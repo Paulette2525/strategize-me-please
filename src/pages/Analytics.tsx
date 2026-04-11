@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CHANNEL_LABELS, CHANNEL_COLORS, Channel } from '@/types/marketing';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 
 export default function Analytics() {
@@ -24,16 +23,9 @@ export default function Analytics() {
     channel: CHANNEL_LABELS[ch as Channel],
     color: CHANNEL_COLORS[ch as Channel],
     ...data,
-    ctr: data.clicks > 0 ? ((data.clicks / data.impressions) * 100).toFixed(1) : 0,
-    convRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : 0,
-    cpa: data.conversions > 0 ? (data.spent / data.conversions).toFixed(0) : 0,
-  }));
-
-  const radarData = channelPerformance.map(ch => ({
-    channel: ch.channel,
-    impressions: Math.min(ch.impressions / 10000, 100),
-    clicks: Math.min(ch.clicks / 1000, 100),
-    conversions: Math.min(ch.conversions / 100, 100),
+    ctr: data.clicks > 0 ? ((data.clicks / data.impressions) * 100).toFixed(1) : '0',
+    convRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : '0',
+    cpa: data.conversions > 0 ? (data.spent / data.conversions).toFixed(0) : '0',
   }));
 
   const projectComparison = projects.map(p => ({
@@ -41,7 +33,6 @@ export default function Analytics() {
     roi: p.roi,
     budget: p.budget / 1000,
     spent: p.spent / 1000,
-    campaigns: campaigns.filter(c => c.projectId === p.id).length,
   }));
 
   return (
@@ -56,7 +47,7 @@ export default function Analytics() {
           { label: 'Impressions', value: campaigns.reduce((s, c) => s + c.impressions, 0).toLocaleString() },
           { label: 'Clics', value: campaigns.reduce((s, c) => s + c.clicks, 0).toLocaleString() },
           { label: 'Conversions', value: campaigns.reduce((s, c) => s + c.conversions, 0).toLocaleString() },
-          { label: 'CTR Moyen', value: `${(campaigns.reduce((s, c) => s + (c.clicks / Math.max(c.impressions, 1)), 0) / campaigns.length * 100).toFixed(1)}%` },
+          { label: 'CTR Moyen', value: `${(campaigns.reduce((s, c) => s + (c.impressions > 0 ? c.clicks / c.impressions : 0), 0) / campaigns.length * 100).toFixed(1)}%` },
         ].map(kpi => (
           <Card key={kpi.label}>
             <CardContent className="p-4 text-center">
@@ -100,7 +91,7 @@ export default function Analytics() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-heading">Coût par Acquisition (CPA)</CardTitle>
+                <CardTitle className="text-lg font-heading">Coût par Acquisition</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -184,5 +175,3 @@ export default function Analytics() {
     </div>
   );
 }
-
-import { Cell } from 'recharts';
