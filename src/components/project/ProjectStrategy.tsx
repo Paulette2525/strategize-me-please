@@ -3,34 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Link2, FileText, Edit3, Save } from 'lucide-react';
 import { useState } from 'react';
-import { CHANNEL_LABELS, Channel, StrategyResource, ChannelDashboardEntry } from '@/types/marketing';
+import { StrategyResource } from '@/types/marketing';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-const allChannels: Channel[] = ['seo', 'ads', 'email', 'social', 'content', 'influencer', 'affiliate', 'pr'];
-
-const CHANNEL_STATUS_LABELS: Record<string, string> = {
-  planned: 'À lancer',
-  active: 'En cours',
-  optimizing: 'Optimisation',
-  paused: 'En pause',
-};
 
 export default function ProjectStrategy({ projectId }: { projectId: string }) {
-  const { getStrategyByProject, addStrategy, updateStrategy, collaborators, getTasksByPlanStep } = useMarketing();
+  const { getStrategyByProject, addStrategy, updateStrategy, getTasksByPlanStep } = useMarketing();
   const strategy = getStrategyByProject(projectId);
 
   const [editing, setEditing] = useState<string | null>(null);
   const [actionPlan, setActionPlan] = useState(strategy?.actionPlan || []);
   const [resources, setResources] = useState<StrategyResource[]>(strategy?.resources || []);
-  const [channelDashboard, setChannelDashboard] = useState<ChannelDashboardEntry[]>(
-    (strategy as any)?.channelDashboard || []
-  );
   const [newStep, setNewStep] = useState('');
   const [newStepDesc, setNewStepDesc] = useState('');
   const [newResLabel, setNewResLabel] = useState('');
@@ -83,131 +68,8 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
     setNewResUrl('');
   };
 
-  const addChannelEntry = (channel: Channel) => {
-    setChannelDashboard(prev => [...prev, {
-      id: crypto.randomUUID(),
-      channel,
-      objective: '',
-      budget: 0,
-      responsibleId: '',
-      status: 'planned' as const,
-    }]);
-  };
-
-  const updateChannelEntry = (id: string, data: Partial<ChannelDashboardEntry>) => {
-    setChannelDashboard(prev => prev.map(e => e.id === id ? { ...e, ...data } : e));
-  };
-
-  const removeChannelEntry = (id: string) => {
-    setChannelDashboard(prev => prev.filter(e => e.id !== id));
-  };
-
-  const usedChannels = channelDashboard.map(e => e.channel);
-  const availableChannels = allChannels.filter(ch => !usedChannels.includes(ch));
-
   return (
     <div className="space-y-6">
-      {/* Channel Dashboard */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-heading">Tableau de bord des canaux</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => {
-              if (editing === 'channels') {
-                saveSection({ channelDashboard, activeChannels: channelDashboard.map(e => e.channel) });
-              } else {
-                setEditing('channels');
-              }
-            }}>
-              {editing === 'channels' ? <><Save className="h-3.5 w-3.5 mr-1" />Sauvegarder</> : <><Edit3 className="h-3.5 w-3.5 mr-1" />Modifier</>}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {channelDashboard.length === 0 && editing !== 'channels' && (
-            <p className="text-sm text-muted-foreground text-center py-6">Ajoutez des canaux marketing pour organiser votre stratégie</p>
-          )}
-          {channelDashboard.length > 0 && (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Canal</TableHead>
-                    <TableHead>Objectif</TableHead>
-                    <TableHead>Budget (€)</TableHead>
-                    <TableHead>Responsable</TableHead>
-                    <TableHead>Statut</TableHead>
-                    {editing === 'channels' && <TableHead></TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {channelDashboard.map(entry => (
-                    <TableRow key={entry.id}>
-                      <TableCell>
-                        <Badge variant="outline">{CHANNEL_LABELS[entry.channel]}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {editing === 'channels' ? (
-                          <Input value={entry.objective} onChange={e => updateChannelEntry(entry.id, { objective: e.target.value })} placeholder="Objectif..." className="h-8 text-sm" />
-                        ) : (
-                          <span className="text-sm">{entry.objective || '—'}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editing === 'channels' ? (
-                          <Input type="number" value={entry.budget} onChange={e => updateChannelEntry(entry.id, { budget: Number(e.target.value) })} className="h-8 w-24 text-sm" />
-                        ) : (
-                          <span className="text-sm font-medium">{entry.budget > 0 ? `${entry.budget.toLocaleString()} €` : '—'}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editing === 'channels' ? (
-                          <Select value={entry.responsibleId} onValueChange={v => updateChannelEntry(entry.id, { responsibleId: v })}>
-                            <SelectTrigger className="h-8 w-32 text-sm"><SelectValue placeholder="Choisir" /></SelectTrigger>
-                            <SelectContent>
-                              {collaborators.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <span className="text-sm">{collaborators.find(c => c.id === entry.responsibleId)?.name || '—'}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {editing === 'channels' ? (
-                          <Select value={entry.status} onValueChange={v => updateChannelEntry(entry.id, { status: v as ChannelDashboardEntry['status'] })}>
-                            <SelectTrigger className="h-8 w-32 text-sm"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(CHANNEL_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">{CHANNEL_STATUS_LABELS[entry.status]}</Badge>
-                        )}
-                      </TableCell>
-                      {editing === 'channels' && (
-                        <TableCell>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeChannelEntry(entry.id)}><X className="h-3.5 w-3.5" /></Button>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          {editing === 'channels' && availableChannels.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t">
-              <span className="text-sm text-muted-foreground mr-2">Ajouter :</span>
-              {availableChannels.map(ch => (
-                <Button key={ch} variant="outline" size="sm" className="text-xs" onClick={() => addChannelEntry(ch)}>
-                  <Plus className="h-3 w-3 mr-1" />{CHANNEL_LABELS[ch]}
-                </Button>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Plan d'action */}
       <Card>
         <CardHeader className="pb-3">
@@ -236,16 +98,16 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
               }} className="mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${step.done ? 'line-through text-muted-foreground' : ''}`}>{i + 1}. {step.step}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {step.description && <p className="text-xs text-muted-foreground">{step.description}</p>}
-                  {(() => {
-                    const stepTasks = getTasksByPlanStep(step.id);
-                    const doneTasks = stepTasks.filter(t => t.status === 'done').length;
-                    return stepTasks.length > 0 ? (
-                      <Badge variant="secondary" className="text-[10px]">{doneTasks}/{stepTasks.length} tâches</Badge>
-                    ) : null;
-                  })()}
-                </div>
+                {step.description && (
+                  <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{step.description}</p>
+                )}
+                {(() => {
+                  const stepTasks = getTasksByPlanStep(step.id);
+                  const doneTasks = stepTasks.filter(t => t.status === 'done').length;
+                  return stepTasks.length > 0 ? (
+                    <Badge variant="secondary" className="text-[10px] mt-1">{doneTasks}/{stepTasks.length} tâches</Badge>
+                  ) : null;
+                })()}
               </div>
               {editing === 'plan' && (
                 <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0" onClick={() => removePlanStep(step.id)}>
