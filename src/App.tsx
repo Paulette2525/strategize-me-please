@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Team from "./pages/Team";
-import CalendarPage from "./pages/CalendarPage";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +27,7 @@ const App = () => (
               <Route path="/projects" element={<Projects />} />
               <Route path="/projects/:id/*" element={<ProjectDetail />} />
               <Route path="/team" element={<Team />} />
-              <Route path="/calendar" element={<CalendarPage />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
