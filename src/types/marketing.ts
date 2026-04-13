@@ -1,7 +1,10 @@
 export type ProjectStatus = 'active' | 'paused' | 'completed' | 'archived';
 export type CampaignStatus = 'draft' | 'planned' | 'active' | 'completed' | 'analyzed';
 export type ContentStatus = 'idea' | 'writing' | 'review' | 'published';
+export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type Channel = 'seo' | 'ads' | 'email' | 'social' | 'content' | 'influencer' | 'affiliate' | 'pr';
+export type CollaboratorRole = 'ceo' | 'manager' | 'marketer' | 'designer' | 'developer' | 'analyst' | 'copywriter';
 
 export interface Project {
   id: string;
@@ -16,6 +19,40 @@ export interface Project {
   color: string;
   campaignCount: number;
   roi: number;
+  teamIds: string[];
+  objectives: string[];
+  progress: number; // 0-100
+}
+
+export interface Collaborator {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: CollaboratorRole;
+  color: string;
+}
+
+export interface Task {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  assigneeId: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: string;
+  channel?: Channel;
+  createdAt: string;
+}
+
+export interface Strategy {
+  id: string;
+  projectId: string;
+  objectives: string[];
+  targetKPIs: { label: string; target: number; current: number }[];
+  timeline: { phase: string; startDate: string; endDate: string; description: string }[];
+  notes: string;
 }
 
 export interface Campaign {
@@ -33,6 +70,7 @@ export interface Campaign {
   impressions: number;
   clicks: number;
   conversions: number;
+  assigneeId?: string;
 }
 
 export interface ContentItem {
@@ -46,6 +84,7 @@ export interface ContentItem {
   createdAt: string;
   publishedAt?: string;
   author: string;
+  assigneeId?: string;
 }
 
 export interface BudgetEntry {
@@ -108,4 +147,28 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   paused: 'En pause',
   completed: 'Terminé',
   archived: 'Archivé',
+};
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'À faire',
+  in_progress: 'En cours',
+  review: 'En review',
+  done: 'Terminé',
+};
+
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: 'Basse',
+  medium: 'Moyenne',
+  high: 'Haute',
+  urgent: 'Urgente',
+};
+
+export const COLLABORATOR_ROLE_LABELS: Record<CollaboratorRole, string> = {
+  ceo: 'CEO',
+  manager: 'Manager',
+  marketer: 'Marketeur',
+  designer: 'Designer',
+  developer: 'Développeur',
+  analyst: 'Analyste',
+  copywriter: 'Rédacteur',
 };
