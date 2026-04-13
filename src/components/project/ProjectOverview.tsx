@@ -119,7 +119,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <Input value={field === editing ? newItem : ''} onChange={e => { setNewItem(e.target.value); setEditing(field as string); }} placeholder="Ajouter..." onKeyDown={e => e.key === 'Enter' && addListItem(field)} className="flex-1" />
+                    <Input value={newItem} onChange={e => setNewItem(e.target.value)} placeholder="Ajouter..." onKeyDown={e => e.key === 'Enter' && addListItem(field)} className="flex-1" />
                     <Button size="sm" variant="outline" onClick={() => addListItem(field)}><Plus className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
