@@ -44,7 +44,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
       status: 'todo',
       priority,
       dueDate: dueDate || new Date().toISOString().split('T')[0],
-      actionId: actionId || undefined,
+      actionId: actionId && actionId !== 'none' ? actionId : undefined,
       createdAt: new Date().toISOString(),
     });
     setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate(''); setActionId('');
@@ -103,7 +103,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                   <Select value={actionId} onValueChange={setActionId}>
                     <SelectTrigger><SelectValue placeholder="Aucune (optionnel)" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucune</SelectItem>
+                      <SelectItem value="none">Aucune</SelectItem>
                       {actions.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
