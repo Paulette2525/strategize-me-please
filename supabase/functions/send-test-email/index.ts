@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
         'X-Connection-Api-Key': RESEND_API_KEY,
       },
       body: JSON.stringify({
-        from: 'Nodie Academy <noreplay@nodieacademy.com>',
+        from: 'Nodie Academy <onboarding@resend.dev>',
         to: [to],
         subject,
         html,
