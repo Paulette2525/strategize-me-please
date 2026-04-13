@@ -45,6 +45,7 @@ interface MarketingContextType {
   getTasksByAssignee: (assigneeId: string) => Task[];
   getStrategyByProject: (projectId: string) => Strategy | undefined;
   getCollaboratorById: (id: string) => Collaborator | undefined;
+  getTasksByAction: (actionId: string) => Task[];
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 }
@@ -113,6 +114,7 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const getTasksByAssignee = useCallback((assigneeId: string) => tasks.filter(t => t.assigneeId === assigneeId), [tasks]);
   const getStrategyByProject = useCallback((projectId: string) => strategies.find(s => s.projectId === projectId), [strategies]);
   const getCollaboratorById = useCallback((id: string) => collaborators.find(c => c.id === id), [collaborators]);
+  const getTasksByAction = useCallback((actionId: string) => tasks.filter(t => t.actionId === actionId), [tasks]);
 
   return (
     <MarketingContext.Provider value={{
@@ -127,7 +129,7 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
       addAction, updateAction, deleteAction, getActionsByProject, getActionById,
       addBrief, updateBrief, getBriefByProject,
       getProjectById, getCampaignsByProject, getContentByProject,
-      getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById,
+      getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById, getTasksByAction,
       searchQuery, setSearchQuery,
     }}>
       {children}
