@@ -2,7 +2,7 @@ import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus } from 'lucide-react';
+import { Plus, Zap } from 'lucide-react';
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TaskStatus, TaskPriority } from '@/types/marketing';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -20,14 +20,16 @@ const priorityColors: Record<TaskPriority, string> = {
 };
 
 export default function ProjectTasks({ projectId }: { projectId: string }) {
-  const { getTasksByProject, addTask, updateTask, collaborators } = useMarketing();
+  const { getTasksByProject, addTask, updateTask, collaborators, getActionsByProject } = useMarketing();
   const tasks = getTasksByProject(projectId);
+  const actions = getActionsByProject(projectId);
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [dueDate, setDueDate] = useState('');
+  const [actionId, setActionId] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
@@ -42,9 +44,10 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
       status: 'todo',
       priority,
       dueDate: dueDate || new Date().toISOString().split('T')[0],
+      actionId: actionId || undefined,
       createdAt: new Date().toISOString(),
     });
-    setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate('');
+    setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate(''); setActionId('');
     setOpen(false);
   };
 
@@ -60,16 +63,12 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
     setDragOverColumn(status);
   };
 
-  const handleDragLeave = () => {
-    setDragOverColumn(null);
-  };
+  const handleDragLeave = () => setDragOverColumn(null);
 
   const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('text/plain');
-    if (taskId) {
-      updateTask(taskId, { status });
-    }
+    if (taskId) updateTask(taskId, { status });
     setDraggedTaskId(null);
     setDragOverColumn(null);
   };
@@ -99,6 +98,17 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                   </SelectContent>
                 </Select>
               </div>
+              {actions.length > 0 && (
+                <div><Label>Action marketing liée</Label>
+                  <Select value={actionId} onValueChange={setActionId}>
+                    <SelectTrigger><SelectValue placeholder="Aucune (optionnel)" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Aucune</SelectItem>
+                      {actions.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Priorité</Label>
                   <Select value={priority} onValueChange={v => setPriority(v as TaskPriority)}>
@@ -135,6 +145,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
               <div className={`space-y-2 min-h-[100px] rounded-lg p-1 transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/20' : ''}`}>
                 {colTasks.map(task => {
                   const assignee = collaborators.find(c => c.id === task.assigneeId);
+                  const linkedAction = task.actionId ? actions.find(a => a.id === task.actionId) : null;
                   const isOverdue = task.status !== 'done' && new Date(task.dueDate) < new Date();
                   const isDragging = draggedTaskId === task.id;
                   return (
@@ -152,6 +163,11 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                             {TASK_PRIORITY_LABELS[task.priority]}
                           </Badge>
                           {isOverdue && <Badge variant="destructive" className="text-[10px]">En retard</Badge>}
+                          {linkedAction && (
+                            <Badge variant="outline" className="text-[10px] flex items-center gap-1">
+                              <Zap className="h-2.5 w-2.5" />{linkedAction.name}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center justify-between mt-2">
                           {assignee ? (
