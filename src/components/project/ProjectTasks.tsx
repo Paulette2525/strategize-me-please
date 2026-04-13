@@ -22,7 +22,7 @@ const priorityColors: Record<TaskPriority, string> = {
 };
 
 export default function ProjectTasks({ projectId }: { projectId: string }) {
-  const { getTasksByProject, addTask, updateTask, collaborators, getStrategyByProject } = useMarketing();
+  const { getTasksByProject, addTask, updateTask, collaborators, getStrategyByProject, getProjectById } = useMarketing();
   const tasks = getTasksByProject(projectId);
   const strategy = getStrategyByProject(projectId);
   const planSteps = strategy?.actionPlan || [];
