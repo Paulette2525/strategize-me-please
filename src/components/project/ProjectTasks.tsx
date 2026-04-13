@@ -158,7 +158,10 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                       className={`cursor-grab active:cursor-grabbing transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-sm'}`}
                     >
                       <CardContent className="p-3">
-                        <p className="text-sm font-medium mb-2">{task.title}</p>
+                        <p className="text-sm font-medium mb-1">{task.title}</p>
+                        {task.description && (
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{task.description}</p>
+                        )}
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`text-[10px] ${priorityColors[task.priority]}`} variant="secondary">
                             {TASK_PRIORITY_LABELS[task.priority]}

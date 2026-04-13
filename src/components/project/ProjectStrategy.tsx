@@ -2,6 +2,7 @@ import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Link2, FileText, Edit3, Save } from 'lucide-react';
@@ -256,7 +257,7 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
           {editing === 'plan' && (
             <div className="flex gap-2 pt-2">
               <Input value={newStep} onChange={e => setNewStep(e.target.value)} placeholder="Nouvelle étape..." className="flex-1" onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addPlanStep())} />
-              <Input value={newStepDesc} onChange={e => setNewStepDesc(e.target.value)} placeholder="Description (optionnel)" className="flex-1" />
+              <Textarea value={newStepDesc} onChange={e => setNewStepDesc(e.target.value)} placeholder="Description (optionnel)" className="flex-1 min-h-[40px]" />
               <Button size="sm" onClick={addPlanStep}><Plus className="h-4 w-4" /></Button>
             </div>
           )}
