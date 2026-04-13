@@ -10,7 +10,6 @@ interface MarketingContextType {
   collaborators: Collaborator[];
   tasks: Task[];
   strategies: Strategy[];
-  actions: MarketingAction[];
   briefs: ProjectBrief[];
   addProject: (project: Project) => void;
   updateProject: (id: string, data: Partial<Project>) => void;
@@ -30,11 +29,6 @@ interface MarketingContextType {
   addStrategy: (strategy: Strategy) => void;
   updateStrategy: (id: string, data: Partial<Strategy>) => void;
   addBudgetEntry: (entry: BudgetEntry) => void;
-  addAction: (action: MarketingAction) => void;
-  updateAction: (id: string, data: Partial<MarketingAction>) => void;
-  deleteAction: (id: string) => void;
-  getActionsByProject: (projectId: string) => MarketingAction[];
-  getActionById: (id: string) => MarketingAction | undefined;
   addBrief: (brief: ProjectBrief) => void;
   updateBrief: (id: string, data: Partial<ProjectBrief>) => void;
   getBriefByProject: (projectId: string) => ProjectBrief | undefined;
@@ -45,7 +39,7 @@ interface MarketingContextType {
   getTasksByAssignee: (assigneeId: string) => Task[];
   getStrategyByProject: (projectId: string) => Strategy | undefined;
   getCollaboratorById: (id: string) => Collaborator | undefined;
-  getTasksByAction: (actionId: string) => Task[];
+  getTasksByPlanStep: (stepId: string) => Task[];
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 }
