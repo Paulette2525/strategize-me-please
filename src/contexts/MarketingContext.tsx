@@ -1,20 +1,40 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Project, Campaign, ContentItem, BudgetEntry } from '@/types/marketing';
-import { mockProjects, mockCampaigns, mockContent, mockBudgetEntries } from '@/data/mockData';
+import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy } from '@/types/marketing';
+import { mockProjects, mockCampaigns, mockContent, mockBudgetEntries, mockCollaborators, mockTasks, mockStrategies } from '@/data/mockData';
 
 interface MarketingContextType {
   projects: Project[];
   campaigns: Campaign[];
   content: ContentItem[];
   budgetEntries: BudgetEntry[];
+  collaborators: Collaborator[];
+  tasks: Task[];
+  strategies: Strategy[];
   addProject: (project: Project) => void;
   updateProject: (id: string, data: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
   addCampaign: (campaign: Campaign) => void;
   updateCampaign: (id: string, data: Partial<Campaign>) => void;
+  deleteCampaign: (id: string) => void;
   addContent: (item: ContentItem) => void;
   updateContent: (id: string, data: Partial<ContentItem>) => void;
+  deleteContent: (id: string) => void;
+  addCollaborator: (collaborator: Collaborator) => void;
+  updateCollaborator: (id: string, data: Partial<Collaborator>) => void;
+  deleteCollaborator: (id: string) => void;
+  addTask: (task: Task) => void;
+  updateTask: (id: string, data: Partial<Task>) => void;
+  deleteTask: (id: string) => void;
+  addStrategy: (strategy: Strategy) => void;
+  updateStrategy: (id: string, data: Partial<Strategy>) => void;
+  addBudgetEntry: (entry: BudgetEntry) => void;
+  getProjectById: (id: string) => Project | undefined;
   getCampaignsByProject: (projectId: string) => Campaign[];
   getContentByProject: (projectId: string) => ContentItem[];
+  getTasksByProject: (projectId: string) => Task[];
+  getTasksByAssignee: (assigneeId: string) => Task[];
+  getStrategyByProject: (projectId: string) => Strategy | undefined;
+  getCollaboratorById: (id: string) => Collaborator | undefined;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 }
@@ -25,28 +45,63 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(mockProjects);
   const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
   const [content, setContent] = useState<ContentItem[]>(mockContent);
-  const [budgetEntries] = useState<BudgetEntry[]>(mockBudgetEntries);
+  const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>(mockBudgetEntries);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>(mockCollaborators);
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [strategies, setStrategies] = useState<Strategy[]>(mockStrategies);
   const [searchQuery, setSearchQuery] = useState('');
 
   const addProject = useCallback((project: Project) => setProjects(prev => [...prev, project]), []);
   const updateProject = useCallback((id: string, data: Partial<Project>) =>
     setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p)), []);
+  const deleteProject = useCallback((id: string) => setProjects(prev => prev.filter(p => p.id !== id)), []);
+
   const addCampaign = useCallback((campaign: Campaign) => setCampaigns(prev => [...prev, campaign]), []);
   const updateCampaign = useCallback((id: string, data: Partial<Campaign>) =>
     setCampaigns(prev => prev.map(c => c.id === id ? { ...c, ...data } : c)), []);
+  const deleteCampaign = useCallback((id: string) => setCampaigns(prev => prev.filter(c => c.id !== id)), []);
+
   const addContent = useCallback((item: ContentItem) => setContent(prev => [...prev, item]), []);
   const updateContent = useCallback((id: string, data: Partial<ContentItem>) =>
     setContent(prev => prev.map(c => c.id === id ? { ...c, ...data } : c)), []);
-  const getCampaignsByProject = useCallback((projectId: string) =>
-    campaigns.filter(c => c.projectId === projectId), [campaigns]);
-  const getContentByProject = useCallback((projectId: string) =>
-    content.filter(c => c.projectId === projectId), [content]);
+  const deleteContent = useCallback((id: string) => setContent(prev => prev.filter(c => c.id !== id)), []);
+
+  const addCollaborator = useCallback((collaborator: Collaborator) => setCollaborators(prev => [...prev, collaborator]), []);
+  const updateCollaborator = useCallback((id: string, data: Partial<Collaborator>) =>
+    setCollaborators(prev => prev.map(c => c.id === id ? { ...c, ...data } : c)), []);
+  const deleteCollaborator = useCallback((id: string) => setCollaborators(prev => prev.filter(c => c.id !== id)), []);
+
+  const addTask = useCallback((task: Task) => setTasks(prev => [...prev, task]), []);
+  const updateTask = useCallback((id: string, data: Partial<Task>) =>
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t)), []);
+  const deleteTask = useCallback((id: string) => setTasks(prev => prev.filter(t => t.id !== id)), []);
+
+  const addStrategy = useCallback((strategy: Strategy) => setStrategies(prev => [...prev, strategy]), []);
+  const updateStrategy = useCallback((id: string, data: Partial<Strategy>) =>
+    setStrategies(prev => prev.map(s => s.id === id ? { ...s, ...data } : s)), []);
+
+  const addBudgetEntry = useCallback((entry: BudgetEntry) => setBudgetEntries(prev => [...prev, entry]), []);
+
+  const getProjectById = useCallback((id: string) => projects.find(p => p.id === id), [projects]);
+  const getCampaignsByProject = useCallback((projectId: string) => campaigns.filter(c => c.projectId === projectId), [campaigns]);
+  const getContentByProject = useCallback((projectId: string) => content.filter(c => c.projectId === projectId), [content]);
+  const getTasksByProject = useCallback((projectId: string) => tasks.filter(t => t.projectId === projectId), [tasks]);
+  const getTasksByAssignee = useCallback((assigneeId: string) => tasks.filter(t => t.assigneeId === assigneeId), [tasks]);
+  const getStrategyByProject = useCallback((projectId: string) => strategies.find(s => s.projectId === projectId), [strategies]);
+  const getCollaboratorById = useCallback((id: string) => collaborators.find(c => c.id === id), [collaborators]);
 
   return (
     <MarketingContext.Provider value={{
-      projects, campaigns, content, budgetEntries,
-      addProject, updateProject, addCampaign, updateCampaign,
-      addContent, updateContent, getCampaignsByProject, getContentByProject,
+      projects, campaigns, content, budgetEntries, collaborators, tasks, strategies,
+      addProject, updateProject, deleteProject,
+      addCampaign, updateCampaign, deleteCampaign,
+      addContent, updateContent, deleteContent,
+      addCollaborator, updateCollaborator, deleteCollaborator,
+      addTask, updateTask, deleteTask,
+      addStrategy, updateStrategy,
+      addBudgetEntry,
+      getProjectById, getCampaignsByProject, getContentByProject,
+      getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById,
       searchQuery, setSearchQuery,
     }}>
       {children}
