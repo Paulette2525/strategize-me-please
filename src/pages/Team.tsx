@@ -2,7 +2,7 @@ import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Trash2 } from 'lucide-react';
 import { COLLABORATOR_ROLE_LABELS, CollaboratorRole } from '@/types/marketing';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Team() {
-  const { collaborators, addCollaborator, tasks, projects } = useMarketing();
+  const { collaborators, addCollaborator, deleteCollaborator, tasks, projects } = useMarketing();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -124,10 +124,21 @@ export default function Team() {
                       <p className="text-[10px] text-muted-foreground">En retard</p>
                     </div>
                   </div>
-                  {assignedProjects.length > 0 && (
-                    <p className="text-xs text-muted-foreground mt-3">
-                      {assignedProjects.length} projet{assignedProjects.length > 1 ? 's' : ''} assigné{assignedProjects.length > 1 ? 's' : ''}
-                    </p>
+                  <div className="flex items-center justify-between mt-3">
+                    {assignedProjects.length > 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {assignedProjects.length} projet{assignedProjects.length > 1 ? 's' : ''} assigné{assignedProjects.length > 1 ? 's' : ''}
+                      </p>
+                    ) : <span />}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => deleteCollaborator(collab.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                   )}
                 </CardContent>
               </Card>
