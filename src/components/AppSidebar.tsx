@@ -1,6 +1,5 @@
 import {
-  LayoutDashboard, FolderKanban, Megaphone, CalendarDays,
-  Wallet, FileText, BarChart3, Settings,
+  LayoutDashboard, FolderKanban, Users, CalendarDays, Settings,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -13,17 +12,13 @@ import {
 const mainItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Projets', url: '/projects', icon: FolderKanban },
-  { title: 'Campagnes', url: '/campaigns', icon: Megaphone },
+  { title: 'Équipe', url: '/team', icon: Users },
   { title: 'Calendrier', url: '/calendar', icon: CalendarDays },
-  { title: 'Budgets', url: '/budgets', icon: Wallet },
-  { title: 'Contenus', url: '/content', icon: FileText },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const location = useLocation();
 
   return (
     <Sidebar collapsible="icon">
@@ -35,7 +30,7 @@ export function AppSidebar() {
             </h1>
           ) : (
             <div className="flex justify-center">
-              <Megaphone className="h-6 w-6 text-sidebar-primary" />
+              <LayoutDashboard className="h-6 w-6 text-sidebar-primary" />
             </div>
           )}
         </div>
