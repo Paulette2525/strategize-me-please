@@ -21,7 +21,7 @@ const CHANNEL_STATUS_LABELS: Record<string, string> = {
 };
 
 export default function ProjectStrategy({ projectId }: { projectId: string }) {
-  const { getStrategyByProject, addStrategy, updateStrategy, collaborators } = useMarketing();
+  const { getStrategyByProject, addStrategy, updateStrategy, collaborators, getTasksByPlanStep } = useMarketing();
   const strategy = getStrategyByProject(projectId);
 
   const [editing, setEditing] = useState<string | null>(null);
@@ -235,7 +235,16 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
               }} className="mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${step.done ? 'line-through text-muted-foreground' : ''}`}>{i + 1}. {step.step}</p>
-                {step.description && <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>}
+                <div className="flex items-center gap-2 mt-0.5">
+                  {step.description && <p className="text-xs text-muted-foreground">{step.description}</p>}
+                  {(() => {
+                    const stepTasks = getTasksByPlanStep(step.id);
+                    const doneTasks = stepTasks.filter(t => t.status === 'done').length;
+                    return stepTasks.length > 0 ? (
+                      <Badge variant="secondary" className="text-[10px]">{doneTasks}/{stepTasks.length} tâches</Badge>
+                    ) : null;
+                  })()}
+                </div>
               </div>
               {editing === 'plan' && (
                 <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0" onClick={() => removePlanStep(step.id)}>
