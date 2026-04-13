@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy } from '@/types/marketing';
+import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy, MarketingAction, ProjectBrief } from '@/types/marketing';
 import { mockProjects, mockCampaigns, mockContent, mockBudgetEntries, mockCollaborators, mockTasks, mockStrategies } from '@/data/mockData';
 
 interface MarketingContextType {
@@ -10,6 +10,8 @@ interface MarketingContextType {
   collaborators: Collaborator[];
   tasks: Task[];
   strategies: Strategy[];
+  actions: MarketingAction[];
+  briefs: ProjectBrief[];
   addProject: (project: Project) => void;
   updateProject: (id: string, data: Partial<Project>) => void;
   deleteProject: (id: string) => void;
@@ -28,6 +30,14 @@ interface MarketingContextType {
   addStrategy: (strategy: Strategy) => void;
   updateStrategy: (id: string, data: Partial<Strategy>) => void;
   addBudgetEntry: (entry: BudgetEntry) => void;
+  addAction: (action: MarketingAction) => void;
+  updateAction: (id: string, data: Partial<MarketingAction>) => void;
+  deleteAction: (id: string) => void;
+  getActionsByProject: (projectId: string) => MarketingAction[];
+  getActionById: (id: string) => MarketingAction | undefined;
+  addBrief: (brief: ProjectBrief) => void;
+  updateBrief: (id: string, data: Partial<ProjectBrief>) => void;
+  getBriefByProject: (projectId: string) => ProjectBrief | undefined;
   getProjectById: (id: string) => Project | undefined;
   getCampaignsByProject: (projectId: string) => Campaign[];
   getContentByProject: (projectId: string) => ContentItem[];
@@ -49,6 +59,8 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const [collaborators, setCollaborators] = useState<Collaborator[]>(mockCollaborators);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [strategies, setStrategies] = useState<Strategy[]>(mockStrategies);
+  const [actions, setActions] = useState<MarketingAction[]>([]);
+  const [briefs, setBriefs] = useState<ProjectBrief[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const addProject = useCallback((project: Project) => setProjects(prev => [...prev, project]), []);
@@ -82,6 +94,18 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
 
   const addBudgetEntry = useCallback((entry: BudgetEntry) => setBudgetEntries(prev => [...prev, entry]), []);
 
+  const addAction = useCallback((action: MarketingAction) => setActions(prev => [...prev, action]), []);
+  const updateAction = useCallback((id: string, data: Partial<MarketingAction>) =>
+    setActions(prev => prev.map(a => a.id === id ? { ...a, ...data } : a)), []);
+  const deleteAction = useCallback((id: string) => setActions(prev => prev.filter(a => a.id !== id)), []);
+  const getActionsByProject = useCallback((projectId: string) => actions.filter(a => a.projectId === projectId), [actions]);
+  const getActionById = useCallback((id: string) => actions.find(a => a.id === id), [actions]);
+
+  const addBrief = useCallback((brief: ProjectBrief) => setBriefs(prev => [...prev, brief]), []);
+  const updateBrief = useCallback((id: string, data: Partial<ProjectBrief>) =>
+    setBriefs(prev => prev.map(b => b.id === id ? { ...b, ...data } : b)), []);
+  const getBriefByProject = useCallback((projectId: string) => briefs.find(b => b.projectId === projectId), [briefs]);
+
   const getProjectById = useCallback((id: string) => projects.find(p => p.id === id), [projects]);
   const getCampaignsByProject = useCallback((projectId: string) => campaigns.filter(c => c.projectId === projectId), [campaigns]);
   const getContentByProject = useCallback((projectId: string) => content.filter(c => c.projectId === projectId), [content]);
@@ -92,7 +116,7 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
 
   return (
     <MarketingContext.Provider value={{
-      projects, campaigns, content, budgetEntries, collaborators, tasks, strategies,
+      projects, campaigns, content, budgetEntries, collaborators, tasks, strategies, actions, briefs,
       addProject, updateProject, deleteProject,
       addCampaign, updateCampaign, deleteCampaign,
       addContent, updateContent, deleteContent,
@@ -100,6 +124,8 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
       addTask, updateTask, deleteTask,
       addStrategy, updateStrategy,
       addBudgetEntry,
+      addAction, updateAction, deleteAction, getActionsByProject, getActionById,
+      addBrief, updateBrief, getBriefByProject,
       getProjectById, getCampaignsByProject, getContentByProject,
       getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById,
       searchQuery, setSearchQuery,

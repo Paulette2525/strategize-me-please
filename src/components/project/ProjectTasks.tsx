@@ -1,5 +1,5 @@
 import { useMarketing } from '@/contexts/MarketingContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
@@ -28,6 +28,8 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
   const [assigneeId, setAssigneeId] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [dueDate, setDueDate] = useState('');
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
   const handleCreate = () => {
     if (!title.trim()) return;
@@ -42,12 +44,39 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
       dueDate: dueDate || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
     });
-    setTitle('');
-    setDescription('');
-    setAssigneeId('');
-    setPriority('medium');
-    setDueDate('');
+    setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate('');
     setOpen(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', taskId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, status: TaskStatus) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverColumn(status);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (taskId) {
+      updateTask(taskId, { status });
+    }
+    setDraggedTaskId(null);
+    setDragOverColumn(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTaskId(null);
+    setDragOverColumn(null);
   };
 
   return (
@@ -87,22 +116,35 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
         </Dialog>
       </div>
 
-      {/* Kanban */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {columns.map(status => {
           const colTasks = tasks.filter(t => t.status === status);
+          const isOver = dragOverColumn === status;
           return (
-            <div key={status} className="space-y-2">
+            <div
+              key={status}
+              className="space-y-2"
+              onDragOver={e => handleDragOver(e, status)}
+              onDragLeave={handleDragLeave}
+              onDrop={e => handleDrop(e, status)}
+            >
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">{TASK_STATUS_LABELS[status]}</h3>
                 <Badge variant="outline" className="text-xs">{colTasks.length}</Badge>
               </div>
-              <div className="space-y-2 min-h-[100px]">
+              <div className={`space-y-2 min-h-[100px] rounded-lg p-1 transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/20' : ''}`}>
                 {colTasks.map(task => {
                   const assignee = collaborators.find(c => c.id === task.assigneeId);
                   const isOverdue = task.status !== 'done' && new Date(task.dueDate) < new Date();
+                  const isDragging = draggedTaskId === task.id;
                   return (
-                    <Card key={task.id} className="hover:shadow-sm transition-shadow">
+                    <Card
+                      key={task.id}
+                      draggable
+                      onDragStart={e => handleDragStart(e, task.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`cursor-grab active:cursor-grabbing transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-sm'}`}
+                    >
                       <CardContent className="p-3">
                         <p className="text-sm font-medium mb-2">{task.title}</p>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -123,21 +165,6 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                           <span className="text-[10px] text-muted-foreground">
                             {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                           </span>
-                        </div>
-                        {/* Status change buttons */}
-                        <div className="flex gap-1 mt-2">
-                          {status !== 'todo' && (
-                            <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => {
-                              const prev = columns[columns.indexOf(status) - 1];
-                              updateTask(task.id, { status: prev });
-                            }}>← </Button>
-                          )}
-                          {status !== 'done' && (
-                            <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 ml-auto" onClick={() => {
-                              const next = columns[columns.indexOf(status) + 1];
-                              updateTask(task.id, { status: next });
-                            }}>→</Button>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
