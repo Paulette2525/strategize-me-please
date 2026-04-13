@@ -1,14 +1,11 @@
 import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { ACTION_STATUS_LABELS } from '@/types/marketing';
 
 export default function ProjectAnalytics({ projectId }: { projectId: string }) {
-  const { getTasksByProject, getActionsByProject, collaborators, getProjectById } = useMarketing();
+  const { getTasksByProject, collaborators, getProjectById } = useMarketing();
   const project = getProjectById(projectId);
   const tasks = getTasksByProject(projectId);
-  const actions = getActionsByProject(projectId);
 
   if (!project) return null;
 
@@ -20,7 +17,6 @@ export default function ProjectAnalytics({ projectId }: { projectId: string }) {
   };
   const taskCompletion = taskStats.total > 0 ? Math.round((taskStats.done / taskStats.total) * 100) : 0;
 
-  // Collaborator performance on this project
   const projectCollabIds = [...new Set(tasks.map(t => t.assigneeId).filter(Boolean))];
   const collabPerf = projectCollabIds.map(cid => {
     const collab = collaborators.find(c => c.id === cid);
@@ -30,32 +26,14 @@ export default function ProjectAnalytics({ projectId }: { projectId: string }) {
     return { collab, total: collabTasks.length, done, overdue };
   }).filter(c => c.collab);
 
-  // Action performance
-  const actionPerf = actions.map(a => ({
-    name: a.name,
-    type: a.type,
-    status: a.status,
-    spent: a.spent,
-    impressions: a.metrics.impressions,
-    clicks: a.metrics.clicks,
-    conversions: a.metrics.conversions,
-    revenue: a.metrics.revenue,
-    roi: a.spent > 0 ? Math.round(((a.metrics.revenue - a.spent) / a.spent) * 100) : 0,
-  }));
-
-  const totalSpent = actions.reduce((s, a) => s + a.spent, 0);
-  const totalRevenue = actions.reduce((s, a) => s + a.metrics.revenue, 0);
-  const globalROI = totalSpent > 0 ? Math.round(((totalRevenue - totalSpent) / totalSpent) * 100) : 0;
-
   return (
     <div className="space-y-6">
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Progression', value: `${taskCompletion}%`, color: 'text-foreground' },
           { label: 'Tâches terminées', value: `${taskStats.done}/${taskStats.total}`, color: 'text-success' },
           { label: 'En retard', value: taskStats.overdue, color: taskStats.overdue > 0 ? 'text-destructive' : 'text-foreground' },
-          { label: 'ROI Global', value: `${globalROI}%`, color: globalROI >= 0 ? 'text-success' : 'text-destructive' },
+          { label: 'En cours', value: taskStats.inProgress, color: 'text-foreground' },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4 text-center">
@@ -66,7 +44,6 @@ export default function ProjectAnalytics({ projectId }: { projectId: string }) {
         ))}
       </div>
 
-      {/* Task progress */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-heading">Progression du Projet</CardTitle>
@@ -80,51 +57,6 @@ export default function ProjectAnalytics({ projectId }: { projectId: string }) {
         </CardContent>
       </Card>
 
-      {/* Action performance table */}
-      {actionPerf.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-heading">Performance des Actions Marketing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Action</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Statut</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Dépensé</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Clics</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Conv.</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Revenus</th>
-                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">ROI</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {actionPerf.map((a, i) => (
-                    <tr key={i} className="border-b last:border-0">
-                      <td className="py-2 px-2">
-                        <p className="font-medium">{a.name}</p>
-                        <p className="text-xs text-muted-foreground">{a.type}</p>
-                      </td>
-                      <td className="py-2 px-2">
-                        <Badge variant="secondary" className="text-[10px]">{ACTION_STATUS_LABELS[a.status]}</Badge>
-                      </td>
-                      <td className="text-right py-2 px-2">{a.spent.toLocaleString()} €</td>
-                      <td className="text-right py-2 px-2">{a.clicks.toLocaleString()}</td>
-                      <td className="text-right py-2 px-2">{a.conversions.toLocaleString()}</td>
-                      <td className="text-right py-2 px-2">{a.revenue.toLocaleString()} €</td>
-                      <td className={`text-right py-2 px-2 font-medium ${a.roi >= 0 ? 'text-success' : 'text-destructive'}`}>{a.roi}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Collaborator performance */}
       {collabPerf.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
@@ -152,10 +84,10 @@ export default function ProjectAnalytics({ projectId }: { projectId: string }) {
         </Card>
       )}
 
-      {actions.length === 0 && tasks.length === 0 && (
+      {tasks.length === 0 && (
         <Card>
           <CardContent className="text-center py-12 text-sm text-muted-foreground">
-            Ajoutez des tâches et des actions marketing pour voir les analytics
+            Ajoutez des tâches pour voir les analytics
           </CardContent>
         </Card>
       )}

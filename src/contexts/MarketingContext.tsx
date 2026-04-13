@@ -54,7 +54,7 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const [collaborators, setCollaborators] = useState<Collaborator[]>(mockCollaborators);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [strategies, setStrategies] = useState<Strategy[]>(mockStrategies);
-  const [actions, setActions] = useState<MarketingAction[]>([]);
+  
   const [briefs, setBriefs] = useState<ProjectBrief[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -89,12 +89,6 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
 
   const addBudgetEntry = useCallback((entry: BudgetEntry) => setBudgetEntries(prev => [...prev, entry]), []);
 
-  const addAction = useCallback((action: MarketingAction) => setActions(prev => [...prev, action]), []);
-  const updateAction = useCallback((id: string, data: Partial<MarketingAction>) =>
-    setActions(prev => prev.map(a => a.id === id ? { ...a, ...data } : a)), []);
-  const deleteAction = useCallback((id: string) => setActions(prev => prev.filter(a => a.id !== id)), []);
-  const getActionsByProject = useCallback((projectId: string) => actions.filter(a => a.projectId === projectId), [actions]);
-  const getActionById = useCallback((id: string) => actions.find(a => a.id === id), [actions]);
 
   const addBrief = useCallback((brief: ProjectBrief) => setBriefs(prev => [...prev, brief]), []);
   const updateBrief = useCallback((id: string, data: Partial<ProjectBrief>) =>
@@ -108,11 +102,11 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const getTasksByAssignee = useCallback((assigneeId: string) => tasks.filter(t => t.assigneeId === assigneeId), [tasks]);
   const getStrategyByProject = useCallback((projectId: string) => strategies.find(s => s.projectId === projectId), [strategies]);
   const getCollaboratorById = useCallback((id: string) => collaborators.find(c => c.id === id), [collaborators]);
-  const getTasksByAction = useCallback((actionId: string) => tasks.filter(t => t.actionId === actionId), [tasks]);
+  const getTasksByPlanStep = useCallback((stepId: string) => tasks.filter(t => t.planStepId === stepId), [tasks]);
 
   return (
     <MarketingContext.Provider value={{
-      projects, campaigns, content, budgetEntries, collaborators, tasks, strategies, actions, briefs,
+      projects, campaigns, content, budgetEntries, collaborators, tasks, strategies, briefs,
       addProject, updateProject, deleteProject,
       addCampaign, updateCampaign, deleteCampaign,
       addContent, updateContent, deleteContent,
@@ -120,10 +114,9 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
       addTask, updateTask, deleteTask,
       addStrategy, updateStrategy,
       addBudgetEntry,
-      addAction, updateAction, deleteAction, getActionsByProject, getActionById,
       addBrief, updateBrief, getBriefByProject,
       getProjectById, getCampaignsByProject, getContentByProject,
-      getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById, getTasksByAction,
+      getTasksByProject, getTasksByAssignee, getStrategyByProject, getCollaboratorById, getTasksByPlanStep,
       searchQuery, setSearchQuery,
     }}>
       {children}

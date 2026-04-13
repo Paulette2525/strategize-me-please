@@ -56,11 +56,10 @@ function AvatarListField({ label, items, onAdd, onRemove }: {
 }
 
 export default function ProjectOverview({ projectId }: { projectId: string }) {
-  const { getProjectById, getBriefByProject, addBrief, updateBrief, collaborators, getTasksByProject, getActionsByProject } = useMarketing();
+  const { getProjectById, getBriefByProject, addBrief, updateBrief, collaborators, getTasksByProject } = useMarketing();
   const project = getProjectById(projectId);
   const brief = getBriefByProject(projectId);
   const tasks = getTasksByProject(projectId);
-  const actions = getActionsByProject(projectId);
 
   const [editing, setEditing] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<ClientAvatar>(brief?.avatar || emptyAvatar);
@@ -103,7 +102,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
 
   const teamMembers = collaborators.filter(c => project.teamIds.includes(c.id));
   const doneTasks = tasks.filter(t => t.status === 'done').length;
-  const activeActions = actions.filter(a => a.status === 'active').length;
+  
 
   const fieldLabels: Record<string, string> = {
     problems: 'Problèmes / Douleurs',
@@ -117,7 +116,6 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Tâches', value: `${doneTasks}/${tasks.length}`, sub: 'terminées' },
-          { label: 'Actions', value: actions.length, sub: `${activeActions} en cours` },
           { label: 'Équipe', value: teamMembers.length, sub: 'membres' },
           { label: 'Créé le', value: new Date(project.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }), sub: '' },
         ].map(s => (
