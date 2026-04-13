@@ -1,52 +1,41 @@
 
 
-## Refonte des Actions Marketing & Strategie
+## Supprimer Actions Marketing, lier Plan d'Action aux Taches
 
-### 1. Pages specifiques par type d'action
+### Concept
 
-Quand l'utilisateur cree une action et clique dessus, le `ActionDetail` affiche une interface adaptee au type choisi :
+Les etapes du **Plan d'Action** (page Strategie) deviennent les "projets parents" des taches. Quand on cree une tache, on choisit a quelle etape du plan elle appartient. Les badges sur le Kanban affichent l'etape liee au lieu de l'action marketing.
 
-**SEO** : Mots-cles cibles (tableau editable), pages a optimiser, backlinks, suivi de positions, checklist SEO technique
-**Publicite Facebook/Instagram** : Audiences cibles, budget quotidien/total, creatives (visuels), A/B tests, KPIs (CPM, CPC, CTR, ROAS)
-**Publicite TikTok** : Format video, audiences, budget, hashtags, KPIs specifiques TikTok
-**Publicite Google Ads** : Mots-cles, groupes d'annonces, budget, CPC max, quality score
-**Email Marketing** : Segments, sequences, taux d'ouverture, taux de clic, A/B tests objets
-**Influence Marketing** : Liste d'influenceurs, budget par influenceur, portee estimee, livrables
-**Affiliation** : Affilies, commissions, liens de tracking, conversions
-**Marketing de contenu** : Calendrier editorial, articles, videos, statuts de production
-**Autre / Custom** : Interface generique actuelle
+### Changements
 
-Chaque type aura des sections et champs specifiques en plus des sections communes (Budget, Notes, Contenus).
+**1. Supprimer la page Actions Marketing**
+- Retirer l'onglet "Actions Marketing" de `ProjectDetail.tsx`
+- Supprimer `src/components/project/ProjectActions.tsx` et `src/components/project/ActionDetail.tsx`
+- Nettoyer le contexte : retirer les fonctions CRUD actions (`addAction`, `updateAction`, `deleteAction`, `getActionsByProject`, `getActionById`) de `MarketingContext.tsx`
 
-### 2. Liaison Actions Marketing ↔ Taches
+**2. Remplacer `actionId` par `planStepId` sur les taches**
+- Dans `src/types/marketing.ts` : remplacer `actionId?: string` par `planStepId?: string` sur le type `Task`
+- Chaque tache sera rattachee a une etape du plan d'action via son `id`
 
-- Ajouter un champ optionnel `actionId` sur le type `Task`
-- Dans `ActionDetail`, afficher les taches liees a cette action (filtrees par `actionId`)
-- Permettre de creer une tache directement depuis une action (pre-remplie avec `actionId`)
-- Dans le Kanban des taches, afficher un badge indiquant l'action marketing associee
+**3. Modifier la creation de tache (`ProjectTasks.tsx`)**
+- Remplacer le select "Action marketing liee" par "Etape du plan d'action"
+- Lister les etapes du plan d'action du projet (depuis `getStrategyByProject`)
+- Afficher le badge de l'etape liee sur chaque carte du Kanban (au lieu du badge action)
 
-### 3. Strategie — Supprimer le Funnel, refaire les Canaux
+**4. Mettre a jour le contexte**
+- Ajouter un getter `getTasksByPlanStep(stepId)` dans `MarketingContext.tsx`
+- Retirer `getTasksByAction`
 
-**Supprimer** : toute la section "Funnel Marketing (AIDA)" de `ProjectStrategy.tsx`
-
-**Remplacer "Canaux Marketing Actifs"** par un vrai tableau de bord des canaux :
-- Chaque canal actif affiche : objectif, budget alloue, responsable, statut (a lancer / en cours / optimisation)
-- C'est un tableau editable, pas juste des badges
-- Lien direct vers les actions marketing de ce canal
+**5. Afficher le nombre de taches par etape dans le Plan d'Action (Strategie)**
+- Dans `ProjectStrategy.tsx`, a cote de chaque etape, afficher un compteur de taches liees (ex: "3 taches")
+- Permet de voir la progression directement depuis la strategie
 
 ### Fichiers impactes
-
-- `src/types/marketing.ts` — Ajouter `actionId?` sur Task, ajouter interfaces specifiques par type (SEOData, AdsData, etc.) sur MarketingAction
-- `src/components/project/ActionDetail.tsx` — Refonte complete avec sections conditionnelles par type + taches liees
-- `src/components/project/ProjectStrategy.tsx` — Supprimer funnel, refaire canaux en tableau editable
-- `src/components/project/ProjectTasks.tsx` — Afficher badge action sur les cartes de taches
-- `src/contexts/MarketingContext.tsx` — Ajouter getter taches par actionId
-
-### Implementation
-
-1. Mettre a jour les types (Task.actionId, ActionTypeData union)
-2. Refondre ActionDetail avec layouts specifiques par type d'action
-3. Supprimer le funnel de ProjectStrategy, remplacer canaux par tableau editable
-4. Lier taches aux actions (creation depuis action, badge dans Kanban)
-5. Mettre a jour le contexte (getTasksByAction)
+- `src/pages/ProjectDetail.tsx` — retirer onglet Actions Marketing
+- `src/components/project/ProjectActions.tsx` — supprimer
+- `src/components/project/ActionDetail.tsx` — supprimer
+- `src/types/marketing.ts` — `Task.actionId` → `Task.planStepId`
+- `src/components/project/ProjectTasks.tsx` — select plan d'action + badges
+- `src/components/project/ProjectStrategy.tsx` — compteur taches par etape
+- `src/contexts/MarketingContext.tsx` — retirer CRUD actions, ajouter `getTasksByPlanStep`
 
