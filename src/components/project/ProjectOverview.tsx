@@ -6,13 +6,54 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Users, Target, MessageSquare, Edit3, Save, Plus, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ClientAvatar, ProjectBrief } from '@/types/marketing';
 
 const emptyAvatar: ClientAvatar = {
   name: '', age: '', occupation: '',
   problems: [], desires: [], objections: [],
 };
+
+function AvatarListField({ label, items, onAdd, onRemove }: {
+  label: string;
+  items: string[];
+  onAdd: (item: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const [value, setValue] = useState('');
+
+  const handleAdd = () => {
+    if (!value.trim()) return;
+    onAdd(value.trim());
+    setValue('');
+  };
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex flex-wrap gap-2 mt-1 mb-2">
+        {items.map((item, i) => (
+          <Badge key={i} variant="secondary" className="gap-1">
+            {item}
+            <button type="button" onClick={() => onRemove(i)} className="ml-1">
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          placeholder="Ajouter..."
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } }}
+          className="flex-1"
+        />
+        <Button type="button" size="sm" variant="outline" onClick={handleAdd}><Plus className="h-3.5 w-3.5" /></Button>
+      </div>
+    </div>
+  );
+}
 
 export default function ProjectOverview({ projectId }: { projectId: string }) {
   const { getProjectById, getBriefByProject, addBrief, updateBrief, collaborators, getTasksByProject, getActionsByProject } = useMarketing();
@@ -28,7 +69,6 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
   const [positioning, setPositioning] = useState(brief?.positioning || '');
   const [keyMessage, setKeyMessage] = useState(brief?.keyMessage || '');
   const [notes, setNotes] = useState(brief?.notes || '');
-  const [newItem, setNewItem] = useState('');
 
   useEffect(() => {
     if (brief) {
@@ -53,19 +93,23 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
     setEditing(null);
   };
 
-  const addListItem = (field: 'problems' | 'desires' | 'objections') => {
-    if (!newItem.trim()) return;
-    setAvatar(prev => ({ ...prev, [field]: [...prev[field], newItem.trim()] }));
-    setNewItem('');
+  const handleAddListItem = (field: 'problems' | 'desires' | 'objections', item: string) => {
+    setAvatar(prev => ({ ...prev, [field]: [...prev[field], item] }));
   };
 
-  const removeListItem = (field: 'problems' | 'desires' | 'objections', index: number) => {
+  const handleRemoveListItem = (field: 'problems' | 'desires' | 'objections', index: number) => {
     setAvatar(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
   };
 
   const teamMembers = collaborators.filter(c => project.teamIds.includes(c.id));
   const doneTasks = tasks.filter(t => t.status === 'done').length;
   const activeActions = actions.filter(a => a.status === 'active').length;
+
+  const fieldLabels: Record<string, string> = {
+    problems: 'Problèmes / Douleurs',
+    desires: 'Désirs / Objectifs',
+    objections: 'Objections / Freins',
+  };
 
   return (
     <div className="space-y-6">
@@ -94,7 +138,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
             <CardTitle className="text-base font-heading flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" /> Avatar Client / Persona
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => editing === 'avatar' ? saveBrief() : setEditing('avatar')}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => editing === 'avatar' ? saveBrief() : setEditing('avatar')}>
               {editing === 'avatar' ? <><Save className="h-3.5 w-3.5 mr-1" />Sauvegarder</> : <><Edit3 className="h-3.5 w-3.5 mr-1" />Modifier</>}
             </Button>
           </div>
@@ -108,21 +152,13 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
                 <div><Label>Occupation</Label><Input value={avatar.occupation} onChange={e => setAvatar(p => ({ ...p, occupation: e.target.value }))} placeholder="Entrepreneur, Salarié..." /></div>
               </div>
               {(['problems', 'desires', 'objections'] as const).map(field => (
-                <div key={field}>
-                  <Label className="capitalize">{field === 'problems' ? 'Problèmes / Douleurs' : field === 'desires' ? 'Désirs / Objectifs' : 'Objections / Freins'}</Label>
-                  <div className="flex flex-wrap gap-2 mt-1 mb-2">
-                    {avatar[field].map((item, i) => (
-                      <Badge key={i} variant="secondary" className="gap-1">
-                        {item}
-                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeListItem(field, i)} />
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input value={newItem} onChange={e => setNewItem(e.target.value)} placeholder="Ajouter..." onKeyDown={e => e.key === 'Enter' && addListItem(field)} className="flex-1" />
-                    <Button size="sm" variant="outline" onClick={() => addListItem(field)}><Plus className="h-3.5 w-3.5" /></Button>
-                  </div>
-                </div>
+                <AvatarListField
+                  key={field}
+                  label={fieldLabels[field]}
+                  items={avatar[field]}
+                  onAdd={(item) => handleAddListItem(field, item)}
+                  onRemove={(index) => handleRemoveListItem(field, index)}
+                />
               ))}
             </div>
           ) : (
@@ -161,7 +197,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
               <CardTitle className="text-base font-heading flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" /> Cible & Marché
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => editing === 'target' ? saveBrief() : setEditing('target')}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => editing === 'target' ? saveBrief() : setEditing('target')}>
                 {editing === 'target' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
               </Button>
             </div>
@@ -193,7 +229,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
               <CardTitle className="text-base font-heading flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" /> Positionnement
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => editing === 'positioning' ? saveBrief() : setEditing('positioning')}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => editing === 'positioning' ? saveBrief() : setEditing('positioning')}>
                 {editing === 'positioning' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
               </Button>
             </div>
@@ -225,7 +261,7 @@ export default function ProjectOverview({ projectId }: { projectId: string }) {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-heading">Notes du projet</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => editing === 'notes' ? saveBrief() : setEditing('notes')}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => editing === 'notes' ? saveBrief() : setEditing('notes')}>
               {editing === 'notes' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
             </Button>
           </div>
