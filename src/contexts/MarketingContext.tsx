@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy, MarketingAction, ProjectBrief } from '@/types/marketing';
 import { mockProjects, mockCampaigns, mockContent, mockBudgetEntries, mockCollaborators, mockTasks, mockStrategies } from '@/data/mockData';
+import { usePersistedState } from '@/hooks/usePersistedState';
 
 interface MarketingContextType {
   projects: Project[];
@@ -47,16 +48,16 @@ interface MarketingContextType {
 const MarketingContext = createContext<MarketingContextType | undefined>(undefined);
 
 export function MarketingProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
-  const [content, setContent] = useState<ContentItem[]>(mockContent);
-  const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>(mockBudgetEntries);
-  const [collaborators, setCollaborators] = useState<Collaborator[]>(mockCollaborators);
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [strategies, setStrategies] = useState<Strategy[]>(mockStrategies);
+  const [projects, setProjects] = usePersistedState<Project[]>('mktg_projects', mockProjects);
+  const [campaigns, setCampaigns] = usePersistedState<Campaign[]>('mktg_campaigns', mockCampaigns);
+  const [content, setContent] = usePersistedState<ContentItem[]>('mktg_content', mockContent);
+  const [budgetEntries, setBudgetEntries] = usePersistedState<BudgetEntry[]>('mktg_budget', mockBudgetEntries);
+  const [collaborators, setCollaborators] = usePersistedState<Collaborator[]>('mktg_collaborators', mockCollaborators);
+  const [tasks, setTasks] = usePersistedState<Task[]>('mktg_tasks', mockTasks);
+  const [strategies, setStrategies] = usePersistedState<Strategy[]>('mktg_strategies', mockStrategies);
   
-  const [briefs, setBriefs] = useState<ProjectBrief[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [briefs, setBriefs] = usePersistedState<ProjectBrief[]>('mktg_briefs', []);
+  const [searchQuery, setSearchQuery] = usePersistedState<string>('mktg_search', '');
 
   const addProject = useCallback((project: Project) => setProjects(prev => [...prev, project]), []);
   const updateProject = useCallback((id: string, data: Partial<Project>) =>
@@ -88,7 +89,6 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
     setStrategies(prev => prev.map(s => s.id === id ? { ...s, ...data } : s)), []);
 
   const addBudgetEntry = useCallback((entry: BudgetEntry) => setBudgetEntries(prev => [...prev, entry]), []);
-
 
   const addBrief = useCallback((brief: ProjectBrief) => setBriefs(prev => [...prev, brief]), []);
   const updateBrief = useCallback((id: string, data: Partial<ProjectBrief>) =>
