@@ -37,20 +37,44 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim()) return;
-    addTask({
+    const taskData = {
       id: crypto.randomUUID(),
       projectId,
       title: title.trim(),
       description: description.trim(),
       assigneeId,
-      status: 'todo',
+      status: 'todo' as const,
       priority,
       dueDate: dueDate || new Date().toISOString().split('T')[0],
       planStepId: planStepId && planStepId !== 'none' ? planStepId : undefined,
       createdAt: new Date().toISOString(),
-    });
+    };
+    addTask(taskData);
+
+    // Envoyer notification email si un collaborateur est assigné
+    const assignee = assigneeId ? collaborators.find(c => c.id === assigneeId) : null;
+    if (assignee?.email) {
+      try {
+        const { error } = await supabase.functions.invoke('notify-task-assigned', {
+          body: {
+            to: assignee.email,
+            taskTitle: taskData.title,
+            taskDescription: taskData.description,
+            taskPriority: taskData.priority,
+            taskDueDate: taskData.dueDate,
+            projectName: project?.name || 'Projet',
+          },
+        });
+        if (error) throw error;
+        toast.success(`Notification envoyée à ${assignee.name}`);
+      } catch (err) {
+        console.error('Email notification error:', err);
+        toast.error("Échec de l'envoi de la notification email");
+      }
+    }
+
     setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate(''); setPlanStepId('');
     setOpen(false);
   };
