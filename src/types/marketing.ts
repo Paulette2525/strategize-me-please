@@ -5,6 +5,7 @@ export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type Channel = 'seo' | 'ads' | 'email' | 'social' | 'content' | 'influencer' | 'affiliate' | 'pr';
 export type CollaboratorRole = 'ceo' | 'manager' | 'marketer' | 'designer' | 'developer' | 'analyst' | 'copywriter';
+export type ActionStatus = 'draft' | 'active' | 'completed' | 'analyzed';
 
 export interface Project {
   id: string;
@@ -21,7 +22,70 @@ export interface Project {
   roi: number;
   teamIds: string[];
   objectives: string[];
-  progress: number; // 0-100
+  progress: number;
+}
+
+export interface ClientAvatar {
+  name: string;
+  age: string;
+  occupation: string;
+  problems: string[];
+  desires: string[];
+  objections: string[];
+}
+
+export interface ProjectBrief {
+  id: string;
+  projectId: string;
+  avatar: ClientAvatar;
+  targetAudience: string;
+  market: string;
+  positioning: string;
+  keyMessage: string;
+  notes: string;
+}
+
+export interface MarketingAction {
+  id: string;
+  projectId: string;
+  name: string;
+  type: string;
+  description: string;
+  status: ActionStatus;
+  budget: number;
+  spent: number;
+  notes: string;
+  contents: ActionContent[];
+  metrics: ActionMetrics;
+  createdAt: string;
+}
+
+export interface ActionContent {
+  id: string;
+  title: string;
+  type: string;
+  status: ContentStatus;
+  createdAt: string;
+}
+
+export interface ActionMetrics {
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  revenue: number;
+}
+
+export interface FunnelStep {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface StrategyResource {
+  id: string;
+  label: string;
+  url?: string;
+  note?: string;
 }
 
 export interface Collaborator {
@@ -53,6 +117,10 @@ export interface Strategy {
   targetKPIs: { label: string; target: number; current: number }[];
   timeline: { phase: string; startDate: string; endDate: string; description: string }[];
   notes: string;
+  activeChannels?: Channel[];
+  funnel?: FunnelStep[];
+  resources?: StrategyResource[];
+  actionPlan?: { id: string; step: string; description: string; done: boolean }[];
 }
 
 export interface Campaign {
@@ -91,6 +159,7 @@ export interface BudgetEntry {
   id: string;
   projectId: string;
   campaignId?: string;
+  actionId?: string;
   channel: Channel;
   amount: number;
   date: string;
@@ -104,6 +173,20 @@ export interface KPI {
   trend: 'up' | 'down' | 'neutral';
   icon: string;
 }
+
+export const ACTION_TYPES = [
+  'SEO', 'Publicité Facebook', 'Publicité Instagram', 'Publicité TikTok',
+  'Publicité Google Ads', 'Email Marketing', 'Marketing de contenu',
+  'Influence Marketing', 'Affiliation', 'Relations Presse', 'Réseaux sociaux',
+  'Landing Page', 'Webinaire', 'Formation', 'Autre',
+];
+
+export const ACTION_STATUS_LABELS: Record<ActionStatus, string> = {
+  draft: 'Brouillon',
+  active: 'En cours',
+  completed: 'Terminé',
+  analyzed: 'Analysé',
+};
 
 export const CHANNEL_LABELS: Record<Channel, string> = {
   seo: 'SEO',
