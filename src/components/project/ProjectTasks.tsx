@@ -160,7 +160,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                       <CardContent className="p-3">
                         <p className="text-sm font-medium mb-1">{task.title}</p>
                         {task.description && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{task.description}</p>
+                          <p className="text-xs text-muted-foreground mb-2 whitespace-pre-wrap">{task.description}</p>
                         )}
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`text-[10px] ${priorityColors[task.priority]}`} variant="secondary">
