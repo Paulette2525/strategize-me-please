@@ -58,6 +58,12 @@ export interface MarketingAction {
   contents: ActionContent[];
   metrics: ActionMetrics;
   createdAt: string;
+  seoData?: SEOData;
+  adsData?: AdsData;
+  emailData?: EmailData;
+  influencerData?: InfluencerData;
+  affiliateData?: AffiliateData;
+  contentPlanData?: ContentPlanData;
 }
 
 export interface ActionContent {
@@ -107,7 +113,59 @@ export interface Task {
   priority: TaskPriority;
   dueDate: string;
   channel?: Channel;
+  actionId?: string;
   createdAt: string;
+}
+
+export interface SEOKeyword {
+  id: string;
+  keyword: string;
+  volume: number;
+  difficulty: string;
+  position: number;
+  page: string;
+}
+
+export interface SEOData {
+  keywords: SEOKeyword[];
+  backlinks: { id: string; domain: string; url: string; status: string }[];
+  checklist: { id: string; label: string; done: boolean }[];
+}
+
+export interface AdsData {
+  platform: string;
+  dailyBudget: number;
+  totalBudget: number;
+  audiences: { id: string; name: string; size: string }[];
+  creatives: { id: string; name: string; format: string; status: string }[];
+  kpis: { cpm: number; cpc: number; ctr: number; roas: number };
+}
+
+export interface EmailData {
+  segments: { id: string; name: string; size: number }[];
+  sequences: { id: string; name: string; emails: number; status: string }[];
+  kpis: { openRate: number; clickRate: number; unsubRate: number };
+}
+
+export interface InfluencerData {
+  influencers: { id: string; name: string; platform: string; followers: string; budget: number; status: string }[];
+}
+
+export interface AffiliateData {
+  affiliates: { id: string; name: string; commission: number; link: string; conversions: number; revenue: number }[];
+}
+
+export interface ContentPlanData {
+  articles: { id: string; title: string; status: string; publishDate: string }[];
+}
+
+export interface ChannelDashboardEntry {
+  id: string;
+  channel: Channel;
+  objective: string;
+  budget: number;
+  responsibleId: string;
+  status: 'planned' | 'active' | 'optimizing' | 'paused';
 }
 
 export interface Strategy {
