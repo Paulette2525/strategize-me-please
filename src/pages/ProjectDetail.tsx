@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ProjectOverview from '@/components/project/ProjectOverview';
 import ProjectStrategy from '@/components/project/ProjectStrategy';
 import ProjectTasks from '@/components/project/ProjectTasks';
-import ProjectActions from '@/components/project/ProjectActions';
+
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectAnalytics from '@/components/project/ProjectAnalytics';
 
@@ -16,7 +16,6 @@ const tabs = [
   { label: 'Vue d\'ensemble', path: 'overview' },
   { label: 'Stratégie', path: 'strategy' },
   { label: 'Tâches', path: 'tasks' },
-  { label: 'Actions Marketing', path: 'actions' },
   { label: 'Finances', path: 'finances' },
   { label: 'Analytics', path: 'analytics' },
 ];
@@ -76,7 +75,7 @@ export default function ProjectDetail() {
         <Route path="overview" element={<ProjectOverview projectId={project.id} />} />
         <Route path="strategy" element={<ProjectStrategy projectId={project.id} />} />
         <Route path="tasks" element={<ProjectTasks projectId={project.id} />} />
-        <Route path="actions" element={<ProjectActions projectId={project.id} />} />
+        
         <Route path="finances" element={<ProjectBudget projectId={project.id} />} />
         <Route path="analytics" element={<ProjectAnalytics projectId={project.id} />} />
         <Route path="" element={<Navigate to="overview" replace />} />

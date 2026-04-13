@@ -113,7 +113,7 @@ export interface Task {
   priority: TaskPriority;
   dueDate: string;
   channel?: Channel;
-  actionId?: string;
+  planStepId?: string;
   createdAt: string;
 }
 
