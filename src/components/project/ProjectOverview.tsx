@@ -1,80 +1,241 @@
 import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { TASK_STATUS_LABELS } from '@/types/marketing';
+import { Users, Target, MessageSquare, Edit3, Save, Plus, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ClientAvatar, ProjectBrief } from '@/types/marketing';
+
+const emptyAvatar: ClientAvatar = {
+  name: '', age: '', occupation: '',
+  problems: [], desires: [], objections: [],
+};
 
 export default function ProjectOverview({ projectId }: { projectId: string }) {
-  const { getProjectById, getCampaignsByProject, getTasksByProject, getContentByProject, collaborators } = useMarketing();
+  const { getProjectById, getBriefByProject, addBrief, updateBrief, collaborators, getTasksByProject, getActionsByProject } = useMarketing();
   const project = getProjectById(projectId);
-  const campaigns = getCampaignsByProject(projectId);
+  const brief = getBriefByProject(projectId);
   const tasks = getTasksByProject(projectId);
-  const content = getContentByProject(projectId);
+  const actions = getActionsByProject(projectId);
+
+  const [editing, setEditing] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<ClientAvatar>(brief?.avatar || emptyAvatar);
+  const [targetAudience, setTargetAudience] = useState(brief?.targetAudience || '');
+  const [market, setMarket] = useState(brief?.market || '');
+  const [positioning, setPositioning] = useState(brief?.positioning || '');
+  const [keyMessage, setKeyMessage] = useState(brief?.keyMessage || '');
+  const [notes, setNotes] = useState(brief?.notes || '');
+  const [newItem, setNewItem] = useState('');
+
+  useEffect(() => {
+    if (brief) {
+      setAvatar(brief.avatar);
+      setTargetAudience(brief.targetAudience);
+      setMarket(brief.market);
+      setPositioning(brief.positioning);
+      setKeyMessage(brief.keyMessage);
+      setNotes(brief.notes);
+    }
+  }, [brief]);
 
   if (!project) return null;
 
-  const doneTasks = tasks.filter(t => t.status === 'done').length;
-  const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
-  const teamMembers = collaborators.filter(c => project.teamIds.includes(c.id));
+  const saveBrief = () => {
+    const data = { avatar, targetAudience, market, positioning, keyMessage, notes };
+    if (brief) {
+      updateBrief(brief.id, data);
+    } else {
+      addBrief({ id: crypto.randomUUID(), projectId, ...data });
+    }
+    setEditing(null);
+  };
 
-  const stats = [
-    { label: 'Campagnes', value: campaigns.length, sub: `${activeCampaigns} actives` },
-    { label: 'Tâches', value: tasks.length, sub: `${doneTasks} terminées` },
-    { label: 'Contenus', value: content.length, sub: `${content.filter(c => c.status === 'published').length} publiés` },
-    { label: 'Équipe', value: teamMembers.length, sub: 'membres' },
-  ];
+  const addListItem = (field: 'problems' | 'desires' | 'objections') => {
+    if (!newItem.trim()) return;
+    setAvatar(prev => ({ ...prev, [field]: [...prev[field], newItem.trim()] }));
+    setNewItem('');
+  };
+
+  const removeListItem = (field: 'problems' | 'desires' | 'objections', index: number) => {
+    setAvatar(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+  };
+
+  const teamMembers = collaborators.filter(c => project.teamIds.includes(c.id));
+  const doneTasks = tasks.filter(t => t.status === 'done').length;
+  const activeActions = actions.filter(a => a.status === 'active').length;
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
+      {/* Quick stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(s => (
+        {[
+          { label: 'Tâches', value: `${doneTasks}/${tasks.length}`, sub: 'terminées' },
+          { label: 'Actions', value: actions.length, sub: `${activeActions} en cours` },
+          { label: 'Équipe', value: teamMembers.length, sub: 'membres' },
+          { label: 'Créé le', value: new Date(project.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }), sub: '' },
+        ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4 text-center">
-              <p className="text-2xl font-heading font-bold">{s.value}</p>
+              <p className="text-xl font-heading font-bold">{s.value}</p>
               <p className="text-sm font-medium">{s.label}</p>
-              <p className="text-xs text-muted-foreground">{s.sub}</p>
+              {s.sub && <p className="text-xs text-muted-foreground">{s.sub}</p>}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Budget */}
+      {/* Avatar Client */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-heading">Budget</CardTitle>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-heading flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" /> Avatar Client / Persona
+            </CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => editing === 'avatar' ? saveBrief() : setEditing('avatar')}>
+              {editing === 'avatar' ? <><Save className="h-3.5 w-3.5 mr-1" />Sauvegarder</> : <><Edit3 className="h-3.5 w-3.5 mr-1" />Modifier</>}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">{project.spent.toLocaleString()} € dépensé</span>
-            <span className="font-medium">{project.budget.toLocaleString()} € total</span>
-          </div>
-          <Progress value={project.budget > 0 ? (project.spent / project.budget) * 100 : 0} className="h-2" />
+          {editing === 'avatar' ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div><Label>Nom du persona</Label><Input value={avatar.name} onChange={e => setAvatar(p => ({ ...p, name: e.target.value }))} placeholder="Ex: Marie, 35 ans" /></div>
+                <div><Label>Âge / Tranche</Label><Input value={avatar.age} onChange={e => setAvatar(p => ({ ...p, age: e.target.value }))} placeholder="25-45 ans" /></div>
+                <div><Label>Occupation</Label><Input value={avatar.occupation} onChange={e => setAvatar(p => ({ ...p, occupation: e.target.value }))} placeholder="Entrepreneur, Salarié..." /></div>
+              </div>
+              {(['problems', 'desires', 'objections'] as const).map(field => (
+                <div key={field}>
+                  <Label className="capitalize">{field === 'problems' ? 'Problèmes / Douleurs' : field === 'desires' ? 'Désirs / Objectifs' : 'Objections / Freins'}</Label>
+                  <div className="flex flex-wrap gap-2 mt-1 mb-2">
+                    {avatar[field].map((item, i) => (
+                      <Badge key={i} variant="secondary" className="gap-1">
+                        {item}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeListItem(field, i)} />
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input value={field === editing ? newItem : ''} onChange={e => { setNewItem(e.target.value); setEditing(field as string); }} placeholder="Ajouter..." onKeyDown={e => e.key === 'Enter' && addListItem(field)} className="flex-1" />
+                    <Button size="sm" variant="outline" onClick={() => addListItem(field)}><Plus className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {avatar.name ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><span className="text-xs text-muted-foreground">Persona</span><p className="text-sm font-medium">{avatar.name || '—'}</p></div>
+                    <div><span className="text-xs text-muted-foreground">Âge</span><p className="text-sm font-medium">{avatar.age || '—'}</p></div>
+                    <div><span className="text-xs text-muted-foreground">Occupation</span><p className="text-sm font-medium">{avatar.occupation || '—'}</p></div>
+                  </div>
+                  {(['problems', 'desires', 'objections'] as const).map(field => (
+                    avatar[field].length > 0 && (
+                      <div key={field}>
+                        <span className="text-xs text-muted-foreground">{field === 'problems' ? 'Problèmes' : field === 'desires' ? 'Désirs' : 'Objections'}</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {avatar[field].map((item, i) => <Badge key={i} variant="outline" className="text-xs">{item}</Badge>)}
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Cliquez sur Modifier pour définir votre avatar client</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Recent tasks */}
+      {/* Cible & Positionnement */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-heading flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" /> Cible & Marché
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => editing === 'target' ? saveBrief() : setEditing('target')}>
+                {editing === 'target' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {editing === 'target' ? (
+              <div className="space-y-3">
+                <div><Label>Audience cible</Label><Textarea value={targetAudience} onChange={e => setTargetAudience(e.target.value)} placeholder="Décrivez votre audience cible..." /></div>
+                <div><Label>Marché / Segment</Label><Input value={market} onChange={e => setMarket(e.target.value)} placeholder="Ex: SaaS B2B, E-commerce mode..." /></div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {targetAudience ? (
+                  <>
+                    <div><span className="text-xs text-muted-foreground">Audience</span><p className="text-sm">{targetAudience}</p></div>
+                    <div><span className="text-xs text-muted-foreground">Marché</span><p className="text-sm">{market || '—'}</p></div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">Définissez votre cible et marché</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-heading flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" /> Positionnement
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => editing === 'positioning' ? saveBrief() : setEditing('positioning')}>
+                {editing === 'positioning' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {editing === 'positioning' ? (
+              <div className="space-y-3">
+                <div><Label>Proposition de valeur</Label><Textarea value={positioning} onChange={e => setPositioning(e.target.value)} placeholder="Qu'est-ce qui vous rend unique ?" /></div>
+                <div><Label>Message clé</Label><Input value={keyMessage} onChange={e => setKeyMessage(e.target.value)} placeholder="Le message principal à communiquer" /></div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {positioning ? (
+                  <>
+                    <div><span className="text-xs text-muted-foreground">Proposition de valeur</span><p className="text-sm">{positioning}</p></div>
+                    <div><span className="text-xs text-muted-foreground">Message clé</span><p className="text-sm">{keyMessage || '—'}</p></div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">Définissez votre positionnement</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Notes */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-heading">Tâches récentes</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-heading">Notes du projet</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => editing === 'notes' ? saveBrief() : setEditing('notes')}>
+              {editing === 'notes' ? <Save className="h-3.5 w-3.5" /> : <Edit3 className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {tasks.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Aucune tâche</p>}
-          {tasks.slice(0, 5).map(task => {
-            const assignee = collaborators.find(c => c.id === task.assigneeId);
-            return (
-              <div key={task.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
-                <div className={`h-2 w-2 rounded-full ${task.status === 'done' ? 'bg-success' : task.status === 'in_progress' ? 'bg-primary' : 'bg-muted-foreground'}`} />
-                <span className="text-sm flex-1 truncate">{task.title}</span>
-                {assignee && (
-                  <div className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-medium text-primary-foreground" style={{ backgroundColor: assignee.color }}>
-                    {assignee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </div>
-                )}
-                <Badge variant="outline" className="text-[10px]">{TASK_STATUS_LABELS[task.status]}</Badge>
-              </div>
-            );
-          })}
+        <CardContent>
+          {editing === 'notes' ? (
+            <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes libres sur le projet..." className="min-h-[120px]" />
+          ) : (
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{notes || 'Aucune note pour le moment'}</p>
+          )}
         </CardContent>
       </Card>
     </div>

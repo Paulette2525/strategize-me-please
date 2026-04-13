@@ -8,8 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ProjectOverview from '@/components/project/ProjectOverview';
 import ProjectStrategy from '@/components/project/ProjectStrategy';
 import ProjectTasks from '@/components/project/ProjectTasks';
-import ProjectCampaigns from '@/components/project/ProjectCampaigns';
-import ProjectContent from '@/components/project/ProjectContent';
+import ProjectActions from '@/components/project/ProjectActions';
 import ProjectBudget from '@/components/project/ProjectBudget';
 import ProjectAnalytics from '@/components/project/ProjectAnalytics';
 
@@ -17,9 +16,8 @@ const tabs = [
   { label: 'Vue d\'ensemble', path: 'overview' },
   { label: 'Stratégie', path: 'strategy' },
   { label: 'Tâches', path: 'tasks' },
-  { label: 'Campagnes', path: 'campaigns' },
-  { label: 'Contenus', path: 'content' },
-  { label: 'Budget', path: 'budget' },
+  { label: 'Actions Marketing', path: 'actions' },
+  { label: 'Finances', path: 'finances' },
   { label: 'Analytics', path: 'analytics' },
 ];
 
@@ -42,7 +40,6 @@ export default function ProjectDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/projects')}>
           <ArrowLeft className="h-4 w-4" />
@@ -57,7 +54,6 @@ export default function ProjectDetail() {
         </Badge>
       </div>
 
-      {/* Tabs */}
       <nav className="flex gap-1 border-b overflow-x-auto">
         {tabs.map(tab => (
           <NavLink
@@ -76,14 +72,12 @@ export default function ProjectDetail() {
         ))}
       </nav>
 
-      {/* Sub-routes */}
       <Routes>
         <Route path="overview" element={<ProjectOverview projectId={project.id} />} />
         <Route path="strategy" element={<ProjectStrategy projectId={project.id} />} />
         <Route path="tasks" element={<ProjectTasks projectId={project.id} />} />
-        <Route path="campaigns" element={<ProjectCampaigns projectId={project.id} />} />
-        <Route path="content" element={<ProjectContent projectId={project.id} />} />
-        <Route path="budget" element={<ProjectBudget projectId={project.id} />} />
+        <Route path="actions" element={<ProjectActions projectId={project.id} />} />
+        <Route path="finances" element={<ProjectBudget projectId={project.id} />} />
         <Route path="analytics" element={<ProjectAnalytics projectId={project.id} />} />
         <Route path="" element={<Navigate to="overview" replace />} />
       </Routes>
