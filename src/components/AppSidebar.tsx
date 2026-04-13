@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, FolderKanban, Users, CalendarDays, Settings,
+  LayoutDashboard, FolderKanban, Users, Settings,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -13,7 +13,6 @@ const mainItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Projets', url: '/projects', icon: FolderKanban },
   { title: 'Équipe', url: '/team', icon: Users },
-  { title: 'Calendrier', url: '/calendar', icon: CalendarDays },
 ];
 
 export function AppSidebar() {
