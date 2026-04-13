@@ -25,7 +25,7 @@ export function AppSidebar() {
         <div className="p-4 pb-2">
           {!collapsed ? (
             <h1 className="font-heading text-lg font-bold text-sidebar-foreground tracking-tight">
-              MarketPilot
+              Automax-Mark
             </h1>
           ) : (
             <div className="flex justify-center">
