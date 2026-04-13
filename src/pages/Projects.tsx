@@ -18,7 +18,6 @@ export default function Projects() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [budget, setBudget] = useState('');
 
   const colors = ['#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#6366f1'];
 
@@ -29,7 +28,7 @@ export default function Projects() {
       name: name.trim(),
       description: description.trim(),
       status: 'active' as const,
-      budget: Number(budget) || 0,
+      budget: 0,
       spent: 0,
       channels: [],
       startDate: new Date().toISOString().split('T')[0],
@@ -43,7 +42,6 @@ export default function Projects() {
     addProject(project);
     setName('');
     setDescription('');
-    setBudget('');
     setOpen(false);
     navigate(`/projects/${project.id}/overview`);
   };
@@ -71,10 +69,6 @@ export default function Projects() {
               <div>
                 <Label>Description</Label>
                 <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Objectifs et contexte du projet..." />
-              </div>
-              <div>
-                <Label>Budget (€)</Label>
-                <Input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="10000" />
               </div>
               <Button onClick={handleCreate} className="w-full">Créer le projet</Button>
             </div>
@@ -107,20 +101,10 @@ export default function Projects() {
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{project.description || 'Aucune description'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2">
                   <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                     {PROJECT_STATUS_LABELS[project.status]}
                   </Badge>
-                  {project.budget > 0 && (
-                    <span className="text-xs text-muted-foreground">{project.budget.toLocaleString()} €</span>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Progression</span>
-                    <span>{project.progress}%</span>
-                  </div>
-                  <Progress value={project.progress} className="h-1.5" />
                 </div>
               </CardContent>
             </Card>

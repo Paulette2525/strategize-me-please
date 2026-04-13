@@ -1,9 +1,5 @@
-import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy } from '@/types/marketing';
+import { Project, Campaign, ContentItem, BudgetEntry, Collaborator, Task, Strategy, MarketingAction, ProjectBrief } from '@/types/marketing';
+import { mockProjects, mockCampaigns, mockContent, mockBudgetEntries, mockCollaborators, mockTasks, mockStrategies } from '@/data/mockData';
 
-export const mockCollaborators: Collaborator[] = [];
-export const mockProjects: Project[] = [];
-export const mockCampaigns: Campaign[] = [];
-export const mockContent: ContentItem[] = [];
-export const mockBudgetEntries: BudgetEntry[] = [];
-export const mockTasks: Task[] = [];
-export const mockStrategies: Strategy[] = [];
+export const mockActions: MarketingAction[] = [];
+export const mockBriefs: ProjectBrief[] = [];
