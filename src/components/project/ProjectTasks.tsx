@@ -103,7 +103,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                   <Select value={actionId} onValueChange={setActionId}>
                     <SelectTrigger><SelectValue placeholder="Aucune (optionnel)" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucune</SelectItem>
+                      <SelectItem value="none">Aucune</SelectItem>
                       {actions.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
