@@ -66,11 +66,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Update task status and add completed resources
+      // Update task status to "review" (only the CEO can mark as "done")
       const { error: updateError } = await supabase
         .from('tasks')
         .update({
-          status: 'done',
+          status: 'review',
           completed_resources: resources || [],
           notes: message ? `[Commentaire du collaborateur] ${message}` : undefined,
         })
