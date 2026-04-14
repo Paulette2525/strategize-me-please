@@ -102,10 +102,29 @@ export default function Projects() {
                     <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{project.description || 'Aucune description'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between">
                   <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                     {PROJECT_STATUS_LABELS[project.status]}
                   </Badge>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={e => e.stopPropagation()}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent onClick={e => e.stopPropagation()}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer ce projet ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Cette action est irréversible. Le projet « {project.name} » et toutes ses données seront supprimés.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteProject(project.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
