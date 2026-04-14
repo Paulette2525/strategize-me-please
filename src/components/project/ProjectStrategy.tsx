@@ -8,8 +8,11 @@ import { Plus, X, Link2, FileText, Edit3, Save } from 'lucide-react';
 import { useState } from 'react';
 import { StrategyResource } from '@/types/marketing';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 
 export default function ProjectStrategy({ projectId }: { projectId: string }) {
+  const navigate = useNavigate();
   const { getStrategyByProject, addStrategy, updateStrategy, getTasksByPlanStep } = useMarketing();
   const strategy = getStrategyByProject(projectId);
 
@@ -87,8 +90,12 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
             <p className="text-sm text-muted-foreground text-center py-4">Définissez les étapes de votre plan marketing</p>
           )}
           {(editing === 'plan' ? actionPlan : strategy?.actionPlan || actionPlan).map((step, i) => (
-            <div key={step.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 group">
-              <Checkbox checked={step.done} onCheckedChange={() => {
+            <div
+              key={step.id}
+              className={`flex items-start gap-3 p-3 rounded-lg bg-muted/50 group ${editing !== 'plan' ? 'cursor-pointer hover:bg-muted/80 transition-colors' : ''}`}
+              onClick={() => { if (editing !== 'plan') navigate(`/projects/${projectId}/plan-step/${step.id}`); }}
+            >
+              <Checkbox checked={step.done} onClick={(e) => e.stopPropagation()} onCheckedChange={() => {
                 if (editing === 'plan') togglePlanStep(step.id);
                 else {
                   const id = ensureStrategy();
@@ -109,10 +116,12 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
                   ) : null;
                 })()}
               </div>
-              {editing === 'plan' && (
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0" onClick={() => removePlanStep(step.id)}>
+              {editing === 'plan' ? (
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); removePlanStep(step.id); }}>
                   <X className="h-3.5 w-3.5" />
                 </Button>
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               )}
             </div>
           ))}
