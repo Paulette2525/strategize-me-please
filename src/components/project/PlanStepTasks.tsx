@@ -236,6 +236,18 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
                           </Badge>
                           {isOverdue && <Badge variant="destructive" className="text-[10px]">En retard</Badge>}
                         </div>
+                        {task.status === 'todo' && task.assigneeId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full mt-2 h-7 text-xs gap-1"
+                            disabled={triggeringTaskId === task.id}
+                            onClick={(e) => handleTriggerTask(e, task.id)}
+                          >
+                            <Play className="h-3 w-3" />
+                            {triggeringTaskId === task.id ? 'Déclenchement...' : 'Déclencher'}
+                          </Button>
+                        )}
                         <div className="flex items-center justify-between mt-2">
                           {assignee ? (
                             <div className="flex items-center gap-1.5">
