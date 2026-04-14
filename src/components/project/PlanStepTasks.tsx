@@ -201,7 +201,8 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
                       draggable
                       onDragStart={e => handleDragStart(e, task.id)}
                       onDragEnd={handleDragEnd}
-                      className={`cursor-grab active:cursor-grabbing transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-sm'}`}
+                      onClick={() => navigate(`/projects/${projectId}/task/${task.id}`)}
+                      className={`cursor-pointer transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-md hover:border-primary/30'}`}
                     >
                       <CardContent className="p-3">
                         <p className="text-sm font-medium mb-1">{task.title}</p>
