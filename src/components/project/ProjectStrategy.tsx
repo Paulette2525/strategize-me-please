@@ -95,7 +95,7 @@ export default function ProjectStrategy({ projectId }: { projectId: string }) {
               className={`flex items-start gap-3 p-3 rounded-lg bg-muted/50 group ${editing !== 'plan' ? 'cursor-pointer hover:bg-muted/80 transition-colors' : ''}`}
               onClick={() => { if (editing !== 'plan') navigate(`/projects/${projectId}/plan-step/${step.id}`); }}
             >
-              <Checkbox checked={step.done} onCheckedChange={() => {
+              <Checkbox checked={step.done} onClick={(e) => e.stopPropagation()} onCheckedChange={() => {
                 if (editing === 'plan') togglePlanStep(step.id);
                 else {
                   const id = ensureStrategy();
