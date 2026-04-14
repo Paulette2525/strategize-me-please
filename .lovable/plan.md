@@ -1,38 +1,36 @@
 
 
-## Plan : Page de profil collaborateur avec statistiques de performance
+## Plan : Flux de tâches structuré avec déclenchement manuel
 
 ### Objectif
-Permettre au CEO de cliquer sur le nom d'un collaborateur dans la page Équipe pour accéder à une page de statistiques détaillées sur sa performance.
+Restructurer le flux de travail des tâches pour que l'email ne soit envoyé qu'au moment où le CEO déclenche manuellement la tâche, pas à la création.
 
-### Statistiques affichées
+### Nouveau flux
+1. **Créer une tâche** → statut "À faire" (todo) — aucun email envoyé
+2. **CEO clique "Déclencher"** → statut "En cours" (in_progress) — email envoyé au collaborateur à ce moment
+3. **Collaborateur valide via le lien externe** → statut "En review" (review)
+4. **CEO valide après examen** → statut "Terminé" (done)
 
-- **KPIs principaux** : Tâches terminées, en cours, en review, en retard, total assignées
-- **Taux de complétion** : % de tâches terminées sur le total
-- **Délai moyen de livraison** : Calculé entre `createdAt` et la date de complétion (quand statut = done)
-- **Tâches en retard** : Nombre et liste des tâches dont la `dueDate` est dépassée
-- **Répartition par priorité** : Nombre de tâches par niveau (urgente, haute, moyenne, basse)
-- **Répartition par projet** : Sur combien de projets le collaborateur travaille, avec progression par projet
-- **Score de fiabilité** : % de tâches livrées dans les délais vs en retard
-- **Liste des tâches récentes** avec statut et date
+### Modifications
 
-### Implémentation
+**1. `src/components/project/ProjectTasks.tsx`**
+- Supprimer l'envoi d'email automatique dans `handleCreate` (lignes 61-82)
+- Ajouter un bouton "▶ Déclencher" sur chaque carte en statut `todo` (visible uniquement pour les tâches assignées)
+- Créer une fonction `handleTriggerTask(taskId)` qui :
+  - Met à jour le statut de la tâche à `in_progress`
+  - Envoie l'email de notification au collaborateur assigné avec le `completionToken`
+  - Affiche un toast de confirmation
 
-**1. Créer `src/pages/TeamMember.tsx`**
-- Nouvelle page accessible via `/team/:collaboratorId`
-- Récupère le collaborateur et ses tâches depuis le contexte
-- Calcule toutes les statistiques ci-dessus
-- Affiche des cartes KPI, une barre de progression, et la liste des tâches
+**2. `src/components/project/PlanStepTasks.tsx`**
+- Même modification : supprimer l'envoi d'email à la création
+- Ajouter le même bouton "Déclencher" et la même logique
 
-**2. Modifier `src/pages/Team.tsx`**
-- Rendre le nom du collaborateur cliquable (lien vers `/team/:collaboratorId`)
-- Ajouter un curseur pointer et un style hover sur le nom
-
-**3. Modifier `src/App.tsx`**
-- Ajouter la route `/team/:collaboratorId` dans les routes protégées
+### Détails techniques
+- Le bouton "Déclencher" sera un petit `Button` avec une icône `Play` de Lucide, affiché en bas de la carte de tâche uniquement quand `status === 'todo'` et `assigneeId` est défini
+- Le clic sur le bouton appellera `updateTask(id, { status: 'in_progress' })` puis `supabase.functions.invoke('notify-task-assigned', ...)`
+- Le bouton aura un `e.stopPropagation()` pour ne pas naviguer vers le détail de la tâche
 
 ### Fichiers concernés
-- `src/pages/TeamMember.tsx` (nouveau)
-- `src/pages/Team.tsx` (lien cliquable)
-- `src/App.tsx` (nouvelle route)
+- `src/components/project/ProjectTasks.tsx`
+- `src/components/project/PlanStepTasks.tsx`
 
