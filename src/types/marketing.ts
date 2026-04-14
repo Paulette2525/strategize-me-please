@@ -103,6 +103,14 @@ export interface Collaborator {
   color: string;
 }
 
+export interface TaskResource {
+  id: string;
+  label: string;
+  url?: string;
+  note?: string;
+  type: 'link' | 'note' | 'schema';
+}
+
 export interface Task {
   id: string;
   projectId: string;
@@ -114,6 +122,8 @@ export interface Task {
   dueDate: string;
   channel?: Channel;
   planStepId?: string;
+  resources?: TaskResource[];
+  notes?: string;
   createdAt: string;
 }
 

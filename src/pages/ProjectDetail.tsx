@@ -8,9 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import ProjectOverview from '@/components/project/ProjectOverview';
 import ProjectStrategy from '@/components/project/ProjectStrategy';
 import ProjectTasks from '@/components/project/ProjectTasks';
-
 import ProjectAnalytics from '@/components/project/ProjectAnalytics';
 import PlanStepTasks from '@/components/project/PlanStepTasks';
+import TaskDetail from '@/components/project/TaskDetail';
 
 const tabs = [
   { label: 'Vue d\'ensemble', path: 'overview' },
@@ -76,6 +76,7 @@ export default function ProjectDetail() {
         <Route path="tasks" element={<ProjectTasks projectId={project.id} />} />
         <Route path="analytics" element={<ProjectAnalytics projectId={project.id} />} />
         <Route path="plan-step/:stepId" element={<PlanStepTasks projectId={project.id} />} />
+        <Route path="task/:taskId" element={<TaskDetail projectId={project.id} />} />
         <Route path="" element={<Navigate to="overview" replace />} />
       </Routes>
     </div>
