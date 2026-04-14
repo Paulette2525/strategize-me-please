@@ -40,6 +40,7 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [triggeringTaskId, setTriggeringTaskId] = useState<string | null>(null);
 
   if (!step) {
     return (
