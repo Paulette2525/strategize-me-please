@@ -1,4 +1,5 @@
 import { useMarketing } from '@/contexts/MarketingContext';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ const priorityColors: Record<TaskPriority, string> = {
 
 export default function ProjectTasks({ projectId }: { projectId: string }) {
   const { getTasksByProject, addTask, updateTask, collaborators, getStrategyByProject, getProjectById } = useMarketing();
+  const navigate = useNavigate();
   const tasks = getTasksByProject(projectId);
   const project = getProjectById(projectId);
   const strategy = getStrategyByProject(projectId);
@@ -182,7 +184,8 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                       draggable
                       onDragStart={e => handleDragStart(e, task.id)}
                       onDragEnd={handleDragEnd}
-                      className={`cursor-grab active:cursor-grabbing transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-sm'}`}
+                      onClick={() => navigate(`/projects/${projectId}/task/${task.id}`)}
+                      className={`cursor-pointer transition-all ${isDragging ? 'opacity-40 scale-95' : 'hover:shadow-md hover:border-primary/30'}`}
                     >
                       <CardContent className="p-3">
                         <p className="text-sm font-medium mb-1">{task.title}</p>
