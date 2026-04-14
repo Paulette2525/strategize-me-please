@@ -154,7 +154,7 @@ export default function TaskComplete() {
         {/* Resources form */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">📎 Ressources liées à votre travail</CardTitle>
+            <CardTitle className="text-base">📎 Ressources & commentaire</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {resources.length > 0 && (
@@ -168,7 +168,6 @@ export default function TaskComplete() {
                           <ExternalLink className="h-3 w-3" />{res.url}
                         </a>
                       )}
-                      {res.note && <p className="text-xs text-slate-500 mt-1">{res.note}</p>}
                     </div>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeResource(res.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-red-500" />
@@ -181,21 +180,15 @@ export default function TaskComplete() {
             <div className="border rounded-lg p-3 space-y-3 bg-white">
               <div><Label>Titre de la ressource</Label><Input value={newLabel} onChange={e => setNewLabel(e.target.value)} placeholder="Ex: Maquette Figma, Article de blog..." /></div>
               <div><Label>Lien (optionnel)</Label><Input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="https://..." /></div>
-              <div><Label>Note (optionnel)</Label><Textarea value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="Détails supplémentaires..." className="min-h-[60px]" /></div>
               <Button size="sm" variant="outline" onClick={addResource} disabled={!newLabel.trim()}>
                 <Plus className="h-4 w-4 mr-1" />Ajouter la ressource
               </Button>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Message */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">💬 Message (optionnel)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Un commentaire pour l'équipe..." className="min-h-[80px]" />
+            <div>
+              <Label>💬 Commentaire (optionnel)</Label>
+              <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Un message pour l'équipe..." className="min-h-[70px] mt-1" />
+            </div>
           </CardContent>
         </Card>
 
