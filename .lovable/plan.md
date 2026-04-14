@@ -1,38 +1,38 @@
 
 
-## Plan : Notification email automatique à l'assignation d'une tâche
+## Plan : Page tâches dédiée par étape du plan d'action
 
 ### Objectif
-Quand une tâche est assignée (création ou réassignation) à un membre de l'équipe, un email est envoyé automatiquement à ce membre via la Edge Function Resend existante.
+Rendre chaque étape du Plan d'Action cliquable dans la page Stratégie. Un clic redirige vers une sous-page avec un Kanban filtré montrant uniquement les tâches liées à cette étape.
 
-### Étapes
+### Fonctionnement
 
-**1. Créer une Edge Function dédiée `notify-task-assigned`**
+```text
+/projects/:id/strategy
+  └── Clic sur "Étape 1 - Créer landing page"
+        → /projects/:id/plan-step/:stepId
+              └── Kanban (À faire | En cours | En review | Terminé)
+                  avec uniquement les tâches de cette étape
+```
 
-Une nouvelle Edge Function qui reçoit les détails de la tâche et du destinataire, construit un email HTML formaté (titre, description, échéance, nom du projet, priorité) et l'envoie via le connector gateway Resend — même pattern que `send-test-email`.
+### Étapes d'implémentation
 
-**2. Modifier `ProjectTasks.tsx` — envoi à la création**
+**1. Créer un nouveau composant `PlanStepTasks.tsx`**
+- Récupère `projectId` et `stepId` depuis les params de route
+- Affiche le nom et la description de l'étape en en-tête avec un bouton retour vers la stratégie
+- Réutilise le même Kanban que `ProjectTasks.tsx` mais filtré sur `task.planStepId === stepId`
+- Permet de créer des tâches directement liées à cette étape (le `planStepId` est pré-rempli)
 
-Après `addTask(...)`, si un assigné est sélectionné et qu'il a un email, appeler `supabase.functions.invoke('notify-task-assigned', ...)` avec les infos de la tâche, du projet et du collaborateur.
+**2. Ajouter la route dans `ProjectDetail.tsx`**
+- Nouvelle route : `plan-step/:stepId` qui rend `<PlanStepTasks />`
 
-**3. Modifier `ProjectTasks.tsx` — envoi au drag & drop (réassignation)**
-
-Le drag & drop actuel ne change que le statut, pas l'assigné. Aucune modification nécessaire ici pour l'instant — la notification se déclenche uniquement à la création/assignation.
-
-**4. Ajouter une possibilité de réassigner une tâche (optionnel)**
-
-Si à l'avenir on ajoute la réassignation d'une tâche existante, le même appel sera ajouté.
-
-### Détails techniques
-
-- La Edge Function `notify-task-assigned` recevra : `{ to, taskTitle, taskDescription, taskPriority, taskDueDate, projectName }`
-- L'email HTML sera stylisé avec les couleurs de l'app (bleu primaire, police Arial)
-- L'expéditeur reste `Nodie Academy <noreplay@elyostalent.com>`
-- Le sujet sera : `Nouvelle tâche assignée : {taskTitle}`
-- Un toast de confirmation/erreur sera affiché côté UI après l'envoi
+**3. Modifier `ProjectStrategy.tsx`**
+- Rendre chaque étape du plan d'action cliquable avec `useNavigate`
+- Au clic sur une étape → `navigate(\`/projects/${projectId}/plan-step/${step.id}\`)`
+- Ajouter un indicateur visuel (icône flèche ou curseur pointer) pour montrer que c'est cliquable
 
 ### Fichiers concernés
-
-- `supabase/functions/notify-task-assigned/index.ts` (nouveau)
-- `src/components/project/ProjectTasks.tsx` (modifié — appel après création)
+- `src/components/project/PlanStepTasks.tsx` — nouveau composant
+- `src/pages/ProjectDetail.tsx` — ajout de la route
+- `src/components/project/ProjectStrategy.tsx` — rendre les étapes cliquables
 
