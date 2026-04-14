@@ -41,6 +41,98 @@ export type Database = {
         }
         Relationships: []
       }
+      task_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          message: string | null
+          resources: Json | null
+          task_id: string
+          token: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          message?: string | null
+          resources?: Json | null
+          task_id: string
+          token: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          message?: string | null
+          resources?: Json | null
+          task_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assignee_id: string | null
+          channel: string | null
+          completed_resources: Json | null
+          completion_token: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          plan_step_id: string | null
+          priority: string
+          project_id: string
+          resources: Json | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          channel?: string | null
+          completed_resources?: Json | null
+          completion_token?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          plan_step_id?: string | null
+          priority?: string
+          project_id: string
+          resources?: Json | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          assignee_id?: string | null
+          channel?: string | null
+          completed_resources?: Json | null
+          completion_token?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          plan_step_id?: string | null
+          priority?: string
+          project_id?: string
+          resources?: Json | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

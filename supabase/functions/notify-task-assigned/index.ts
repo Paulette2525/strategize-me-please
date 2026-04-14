@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { to, taskTitle, taskDescription, taskPriority, taskDueDate, projectName } = await req.json()
+    const { to, taskTitle, taskDescription, taskPriority, taskDueDate, projectName, completionToken } = await req.json()
 
     if (!to || !taskTitle) {
       return new Response(JSON.stringify({ error: 'Missing required fields: to, taskTitle' }), {
@@ -44,6 +44,22 @@ Deno.serve(async (req) => {
     const formattedDate = taskDueDate
       ? new Date(taskDueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
       : 'Non définie'
+
+    const completeUrl = completionToken
+      ? `https://strategize-me-please.lovable.app/task-complete/${completionToken}`
+      : null
+
+    const completeButton = completeUrl ? `
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr><td align="center">
+                <a href="${completeUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">
+                  ✅ Compléter ma tâche
+                </a>
+              </td></tr>
+            </table>
+            <p style="margin:0 0 24px;color:#64748b;font-size:12px;text-align:center;">
+              Ce lien vous permet de marquer la tâche comme terminée et d'ajouter vos ressources directement, sans avoir besoin de vous connecter.
+            </p>` : ''
 
     const html = `
 <!DOCTYPE html>
@@ -79,6 +95,8 @@ Deno.serve(async (req) => {
                 </td>
               </tr>
             </table>
+
+            ${completeButton}
 
             <p style="margin:0;color:#94a3b8;font-size:12px;text-align:center;">Cet email a été envoyé automatiquement par Nodie Academy.</p>
           </td>

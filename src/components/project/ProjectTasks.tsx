@@ -53,7 +53,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
       planStepId: planStepId && planStepId !== 'none' ? planStepId : undefined,
       createdAt: new Date().toISOString(),
     };
-    addTask(taskData);
+    const result = await addTask(taskData);
 
     // Envoyer notification email si un collaborateur est assigné
     const assignee = assigneeId ? collaborators.find(c => c.id === assigneeId) : null;
@@ -67,6 +67,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
             taskPriority: taskData.priority,
             taskDueDate: taskData.dueDate,
             projectName: project?.name || 'Projet',
+            completionToken: (result as any)?.completionToken || null,
           },
         });
         if (error) throw error;
