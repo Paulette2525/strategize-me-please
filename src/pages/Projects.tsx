@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 export default function Projects() {
-  const { projects, addProject } = useMarketing();
+  const { projects, addProject, deleteProject } = useMarketing();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
