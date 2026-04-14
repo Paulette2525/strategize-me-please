@@ -62,7 +62,14 @@ export function MarketingProvider({ children }: { children: ReactNode }) {
   const addProject = useCallback((project: Project) => setProjects(prev => [...prev, project]), []);
   const updateProject = useCallback((id: string, data: Partial<Project>) =>
     setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p)), []);
-  const deleteProject = useCallback((id: string) => setProjects(prev => prev.filter(p => p.id !== id)), []);
+  const deleteProject = useCallback((id: string) => {
+    setProjects(prev => prev.filter(p => p.id !== id));
+    setTasks(prev => prev.filter(t => t.projectId !== id));
+    setCampaigns(prev => prev.filter(c => c.projectId !== id));
+    setContent(prev => prev.filter(c => c.projectId !== id));
+    setStrategies(prev => prev.filter(s => s.projectId !== id));
+    setBriefs(prev => prev.filter(b => b.projectId !== id));
+  }, []);
 
   const addCampaign = useCallback((campaign: Campaign) => setCampaigns(prev => [...prev, campaign]), []);
   const updateCampaign = useCallback((id: string, data: Partial<Campaign>) =>
