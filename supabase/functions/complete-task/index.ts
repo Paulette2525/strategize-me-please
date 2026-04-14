@@ -60,17 +60,17 @@ Deno.serve(async (req) => {
         })
       }
 
-      if (task.status === 'done') {
-        return new Response(JSON.stringify({ error: 'Cette tâche est déjà marquée comme terminée' }), {
+      if (task.status === 'done' || task.status === 'review') {
+        return new Response(JSON.stringify({ error: 'Cette tâche est déjà marquée comme terminée ou en review' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
 
-      // Update task status and add completed resources
+      // Update task status to "review" (only the CEO can mark as "done")
       const { error: updateError } = await supabase
         .from('tasks')
         .update({
-          status: 'done',
+          status: 'review',
           completed_resources: resources || [],
           notes: message ? `[Commentaire du collaborateur] ${message}` : undefined,
         })
