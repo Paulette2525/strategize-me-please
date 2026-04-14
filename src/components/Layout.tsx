@@ -36,8 +36,11 @@ export function Layout({ children }: { children: ReactNode }) {
                   3
                 </Badge>
               </Button>
+              <Button variant="ghost" size="icon" onClick={signOut} title="Se déconnecter">
+                <LogOut className="h-4 w-4" />
+              </Button>
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                U
+                {user?.user_metadata?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
             </div>
           </header>
