@@ -62,8 +62,8 @@ export default function TaskComplete() {
 
   const addResource = () => {
     if (!newLabel.trim()) return;
-    setResources(prev => [...prev, { id: crypto.randomUUID(), label: newLabel.trim(), url: newUrl.trim(), note: newNote.trim() }]);
-    setNewLabel(''); setNewUrl(''); setNewNote('');
+    setResources(prev => [...prev, { id: crypto.randomUUID(), label: newLabel.trim(), url: newUrl.trim(), note: '' }]);
+    setNewLabel(''); setNewUrl('');
   };
 
   const removeResource = (id: string) => setResources(prev => prev.filter(r => r.id !== id));
