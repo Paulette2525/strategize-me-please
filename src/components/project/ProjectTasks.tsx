@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Target } from 'lucide-react';
+import { Plus, Target, Play } from 'lucide-react';
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TaskStatus, TaskPriority } from '@/types/marketing';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -39,6 +39,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [triggeringTaskId, setTriggeringTaskId] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!title.trim() || isCreating) return;
@@ -58,33 +59,45 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
     };
     const result = await addTask(taskData);
 
-    // Envoyer notification email si un collaborateur est assigné
-    const assignee = assigneeId ? collaborators.find(c => c.id === assigneeId) : null;
-    if (assignee?.email) {
-      try {
-        const { error } = await supabase.functions.invoke('notify-task-assigned', {
-          body: {
-            to: assignee.email,
-            taskTitle: taskData.title,
-            taskDescription: taskData.description,
-            taskPriority: taskData.priority,
-            taskDueDate: taskData.dueDate,
-            projectName: project?.name || 'Projet',
-            completionToken: (result as any)?.completionToken || null,
-          },
-        });
-        if (error) throw error;
-        toast.success(`Notification envoyée à ${assignee.name}`);
-      } catch (err) {
-        console.error('Email notification error:', err);
-        toast.error("Échec de l'envoi de la notification email");
-      }
-    }
-
     setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate(''); setPlanStepId('');
     setOpen(false);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleTriggerTask = async (e: React.MouseEvent, taskId: string) => {
+    e.stopPropagation();
+    if (triggeringTaskId) return;
+    setTriggeringTaskId(taskId);
+    try {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      await updateTask(taskId, { status: 'in_progress' });
+      const assignee = task.assigneeId ? collaborators.find(c => c.id === task.assigneeId) : null;
+      if (assignee?.email) {
+        const { error } = await supabase.functions.invoke('notify-task-assigned', {
+          body: {
+            to: assignee.email,
+            taskTitle: task.title,
+            taskDescription: task.description,
+            taskPriority: task.priority,
+            taskDueDate: task.dueDate,
+            projectName: project?.name || 'Projet',
+            completionToken: (task as any).completionToken || null,
+          },
+        });
+        if (error) {
+          console.error('Email notification error:', error);
+          toast.error("Échec de l'envoi de la notification email");
+        } else {
+          toast.success(`Tâche déclenchée — notification envoyée à ${assignee.name}`);
+        }
+      } else {
+        toast.success('Tâche déclenchée');
+      }
+    } finally {
+      setTriggeringTaskId(null);
     }
   };
 
@@ -223,6 +236,18 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                             {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                           </span>
                         </div>
+                        {task.status === 'todo' && task.assigneeId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full mt-2 h-7 text-xs gap-1"
+                            disabled={triggeringTaskId === task.id}
+                            onClick={(e) => handleTriggerTask(e, task.id)}
+                          >
+                            <Play className="h-3 w-3" />
+                            {triggeringTaskId === task.id ? 'Déclenchement...' : 'Déclencher'}
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
                   );
