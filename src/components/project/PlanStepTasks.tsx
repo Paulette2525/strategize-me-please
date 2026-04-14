@@ -71,32 +71,45 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
     };
     const result = await addTask(taskData);
 
-    const assignee = assigneeId ? collaborators.find(c => c.id === assigneeId) : null;
-    if (assignee?.email) {
-      try {
-        const { error } = await supabase.functions.invoke('notify-task-assigned', {
-          body: {
-            to: assignee.email,
-            taskTitle: taskData.title,
-            taskDescription: taskData.description,
-            taskPriority: taskData.priority,
-            taskDueDate: taskData.dueDate,
-            projectName: project?.name || 'Projet',
-            completionToken: (result as any)?.completionToken || null,
-          },
-        });
-        if (error) throw error;
-        toast.success(`Notification envoyée à ${assignee.name}`);
-      } catch (err) {
-        console.error('Email notification error:', err);
-        toast.error("Échec de l'envoi de la notification email");
-      }
-    }
-
     setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate('');
     setOpen(false);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleTriggerTask = async (e: React.MouseEvent, taskId: string) => {
+    e.stopPropagation();
+    if (triggeringTaskId) return;
+    setTriggeringTaskId(taskId);
+    try {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+      await updateTask(taskId, { status: 'in_progress' });
+      const assignee = task.assigneeId ? collaborators.find(c => c.id === task.assigneeId) : null;
+      if (assignee?.email) {
+        const { error } = await supabase.functions.invoke('notify-task-assigned', {
+          body: {
+            to: assignee.email,
+            taskTitle: task.title,
+            taskDescription: task.description,
+            taskPriority: task.priority,
+            taskDueDate: task.dueDate,
+            projectName: project?.name || 'Projet',
+            completionToken: (task as any).completionToken || null,
+          },
+        });
+        if (error) {
+          console.error('Email notification error:', error);
+          toast.error("Échec de l'envoi de la notification email");
+        } else {
+          toast.success(`Tâche déclenchée — notification envoyée à ${assignee.name}`);
+        }
+      } else {
+        toast.success('Tâche déclenchée');
+      }
+    } finally {
+      setTriggeringTaskId(null);
     }
   };
 
