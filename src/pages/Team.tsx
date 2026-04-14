@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users, Trash2 } from 'lucide-react';
 import { COLLABORATOR_ROLE_LABELS, CollaboratorRole } from '@/types/marketing';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Team() {
+  const navigate = useNavigate();
   const { collaborators, addCollaborator, deleteCollaborator, tasks, projects } = useMarketing();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -105,7 +107,7 @@ export default function Team() {
                       {collab.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">{collab.name}</p>
+                      <p className="font-semibold truncate cursor-pointer hover:text-primary transition-colors" onClick={() => navigate(`/team/${collab.id}`)}>{collab.name}</p>
                       <p className="text-xs text-muted-foreground">{collab.email}</p>
                     </div>
                   </div>

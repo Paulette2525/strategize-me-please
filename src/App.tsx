@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Team from "./pages/Team";
+import TeamMember from "./pages/TeamMember";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import TaskComplete from "./pages/TaskComplete";
@@ -39,6 +40,7 @@ function ProtectedRoutes() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id/*" element={<ProjectDetail />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/team/:collaboratorId" element={<TeamMember />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
