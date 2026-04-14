@@ -6,6 +6,8 @@ import { Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMarketing } from '@/contexts/MarketingContext';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
 export function Layout({ children }: { children: ReactNode }) {
   const { searchQuery, setSearchQuery } = useMarketing();
