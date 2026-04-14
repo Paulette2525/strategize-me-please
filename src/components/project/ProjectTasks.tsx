@@ -39,6 +39,7 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [triggeringTaskId, setTriggeringTaskId] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!title.trim() || isCreating) return;
