@@ -65,7 +65,7 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
       planStepId: stepId,
       createdAt: new Date().toISOString(),
     };
-    addTask(taskData);
+    const result = await addTask(taskData);
 
     const assignee = assigneeId ? collaborators.find(c => c.id === assigneeId) : null;
     if (assignee?.email) {
@@ -78,6 +78,7 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
             taskPriority: taskData.priority,
             taskDueDate: taskData.dueDate,
             projectName: project?.name || 'Projet',
+            completionToken: (result as any)?.completionToken || null,
           },
         });
         if (error) throw error;
