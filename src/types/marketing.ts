@@ -125,6 +125,8 @@ export interface Task {
   resources?: TaskResource[];
   notes?: string;
   createdAt: string;
+  completionToken?: string;
+  completedResources?: any[];
 }
 
 export interface SEOKeyword {
