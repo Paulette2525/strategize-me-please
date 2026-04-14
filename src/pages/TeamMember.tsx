@@ -27,7 +27,7 @@ export default function TeamMember() {
   const allTasks = tasks.filter(t => t.assigneeId === collab.id);
   const done = allTasks.filter(t => t.status === 'done');
   const inProgress = allTasks.filter(t => t.status === 'in_progress');
-  const inReview = allTasks.filter(t => t.status === 'in_review');
+  const inReview = allTasks.filter(t => t.status === 'review');
   const todo = allTasks.filter(t => t.status === 'todo');
   const now = new Date();
   const overdue = allTasks.filter(t => t.status !== 'done' && t.dueDate && new Date(t.dueDate) < now);
