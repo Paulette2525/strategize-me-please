@@ -44,7 +44,7 @@ export default function TaskComplete() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [newLabel, setNewLabel] = useState('');
   const [newUrl, setNewUrl] = useState('');
-  const [newNote, setNewNote] = useState('');
+  
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
