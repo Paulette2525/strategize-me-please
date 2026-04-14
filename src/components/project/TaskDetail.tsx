@@ -88,42 +88,6 @@ export default function TaskDetail({ projectId }: { projectId: string }) {
         </div>
       </div>
 
-      {/* Metadata */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-          <Label className="text-xs text-muted-foreground">Statut</Label>
-          <Select value={task.status} onValueChange={v => updateTask(task.id, { status: v as TaskStatus })}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(TASK_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs text-muted-foreground">Priorité</Label>
-          <Select value={task.priority} onValueChange={v => updateTask(task.id, { priority: v as TaskPriority })}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(TASK_PRIORITY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs text-muted-foreground">Assigné à</Label>
-          <Select value={task.assigneeId || 'none'} onValueChange={v => updateTask(task.id, { assigneeId: v === 'none' ? '' : v })}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Non assigné</SelectItem>
-              {collaborators.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs text-muted-foreground">Échéance</Label>
-          <Input type="date" value={task.dueDate} onChange={e => updateTask(task.id, { dueDate: e.target.value })} className="mt-1" />
-        </div>
-      </div>
-
       {/* Description */}
       <Card>
         <CardHeader className="pb-2">
