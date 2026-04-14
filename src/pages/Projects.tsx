@@ -2,9 +2,8 @@ import { useMarketing } from '@/contexts/MarketingContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, FolderKanban, Trash2 } from 'lucide-react';
+import { Plus, FolderKanban, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Progress } from '@/components/ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PROJECT_STATUS_LABELS } from '@/types/marketing';
 import { useState } from 'react';
@@ -12,13 +11,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Projects() {
-  const { projects, addProject, deleteProject } = useMarketing();
+  const { projects, addProject, updateProject, deleteProject } = useMarketing();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+
+  const activeProjects = projects.filter(p => p.status !== 'archived');
+  const archivedProjects = projects.filter(p => p.status === 'archived');
 
   const colors = ['#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#6366f1'];
 
@@ -46,6 +49,85 @@ export default function Projects() {
     setOpen(false);
     navigate(`/projects/${project.id}/overview`);
   };
+
+  const handleArchive = (id: string) => {
+    updateProject(id, { status: 'archived' });
+  };
+
+  const handleRestore = (id: string) => {
+    updateProject(id, { status: 'active' });
+  };
+
+  const renderProjectCard = (project: typeof projects[0], archived = false) => (
+    <Card
+      key={project.id}
+      className={`hover:shadow-md transition-shadow ${archived ? 'opacity-70' : 'cursor-pointer'}`}
+      onClick={() => !archived && navigate(`/projects/${project.id}/overview`)}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="h-4 w-4 rounded-full shrink-0 mt-1" style={{ backgroundColor: project.color }} />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-heading font-semibold truncate">{project.name}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{project.description || 'Aucune description'}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+            {PROJECT_STATUS_LABELS[project.status]}
+          </Badge>
+          <div className="flex gap-1">
+            {archived ? (
+              <>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={e => { e.stopPropagation(); handleRestore(project.id); }} title="Restaurer">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={e => e.stopPropagation()}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent onClick={e => e.stopPropagation()}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer définitivement ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action est irréversible. Le projet « {project.name} » et toutes ses données seront supprimés.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteProject(project.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-amber-500" onClick={e => e.stopPropagation()}>
+                    <Archive className="h-3.5 w-3.5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent onClick={e => e.stopPropagation()}>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Archiver ce projet ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Le projet « {project.name} » sera archivé. Vous pourrez le restaurer à tout moment.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleArchive(project.id)}>Archiver</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -77,60 +159,45 @@ export default function Projects() {
         </Dialog>
       </div>
 
-      {projects.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-heading font-semibold text-lg mb-1">Aucun projet</h3>
-            <p className="text-muted-foreground text-sm mb-4">Créez votre premier projet marketing pour commencer</p>
-            <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4 mr-2" />Créer un projet</Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map(project => (
-            <Card
-              key={project.id}
-              className="hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/projects/${project.id}/overview`)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="h-4 w-4 rounded-full shrink-0 mt-1" style={{ backgroundColor: project.color }} />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-heading font-semibold truncate">{project.name}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{project.description || 'Aucune description'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                    {PROJECT_STATUS_LABELS[project.status]}
-                  </Badge>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={e => e.stopPropagation()}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent onClick={e => e.stopPropagation()}>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Supprimer ce projet ?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Cette action est irréversible. Le projet « {project.name} » et toutes ses données seront supprimés.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteProject(project.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Supprimer</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+      <Tabs defaultValue="active">
+        <TabsList>
+          <TabsTrigger value="active">Actifs ({activeProjects.length})</TabsTrigger>
+          <TabsTrigger value="archived">Archivés ({archivedProjects.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active" className="mt-4">
+          {activeProjects.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="font-heading font-semibold text-lg mb-1">Aucun projet actif</h3>
+                <p className="text-muted-foreground text-sm mb-4">Créez votre premier projet marketing pour commencer</p>
+                <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4 mr-2" />Créer un projet</Button>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeProjects.map(p => renderProjectCard(p))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="archived" className="mt-4">
+          {archivedProjects.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <Archive className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="font-heading font-semibold text-lg mb-1">Aucun projet archivé</h3>
+                <p className="text-muted-foreground text-sm">Les projets archivés apparaîtront ici</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {archivedProjects.map(p => renderProjectCard(p, true))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
