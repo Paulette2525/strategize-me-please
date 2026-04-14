@@ -39,6 +39,7 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
   const [dueDate, setDueDate] = useState('');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   if (!step) {
     return (
@@ -52,7 +53,9 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
   }
 
   const handleCreate = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || isCreating) return;
+    setIsCreating(true);
+    try {
     const taskData = {
       id: crypto.randomUUID(),
       projectId,
@@ -91,6 +94,9 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
 
     setTitle(''); setDescription(''); setAssigneeId(''); setPriority('medium'); setDueDate('');
     setOpen(false);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
@@ -169,7 +175,7 @@ export default function PlanStepTasks({ projectId }: { projectId: string }) {
                 </div>
                 <div><Label>Échéance</Label><Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
               </div>
-              <Button onClick={handleCreate} className="w-full">Créer</Button>
+              <Button onClick={handleCreate} className="w-full" disabled={isCreating || !title.trim()}>{isCreating ? 'Création...' : 'Créer'}</Button>
             </div>
           </DialogContent>
         </Dialog>
