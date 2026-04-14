@@ -11,6 +11,7 @@ import { LogOut } from 'lucide-react';
 
 export function Layout({ children }: { children: ReactNode }) {
   const { searchQuery, setSearchQuery } = useMarketing();
+  const { user, signOut } = useAuth();
 
   return (
     <SidebarProvider>
