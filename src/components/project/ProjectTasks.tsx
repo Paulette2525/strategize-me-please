@@ -236,6 +236,18 @@ export default function ProjectTasks({ projectId }: { projectId: string }) {
                             {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                           </span>
                         </div>
+                        {task.status === 'todo' && task.assigneeId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full mt-2 h-7 text-xs gap-1"
+                            disabled={triggeringTaskId === task.id}
+                            onClick={(e) => handleTriggerTask(e, task.id)}
+                          >
+                            <Play className="h-3 w-3" />
+                            {triggeringTaskId === task.id ? 'Déclenchement...' : 'Déclencher'}
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
                   );
