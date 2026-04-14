@@ -160,6 +160,30 @@ export default function TaskDetail({ projectId }: { projectId: string }) {
         </CardContent>
       </Card>
 
+      {/* Completed Resources (from external collaborator) */}
+      {task.completedResources && task.completedResources.length > 0 && (
+        <Card className="border-green-200 bg-green-50/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-green-800">✅ Ressources du collaborateur</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {task.completedResources.map((res: any, idx: number) => (
+              <div key={res.id || idx} className="flex items-start gap-3 p-3 rounded-lg border border-green-200 bg-white">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{res.label}</p>
+                  {res.url && (
+                    <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5">
+                      <ExternalLink className="h-3 w-3" />{res.url}
+                    </a>
+                  )}
+                  {res.note && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{res.note}</p>}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Notes & Strategy */}
       <Card>
         <CardHeader className="pb-2">
