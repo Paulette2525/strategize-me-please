@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
         })
       }
 
-      if (task.status === 'done') {
-        return new Response(JSON.stringify({ error: 'Cette tâche est déjà marquée comme terminée' }), {
+      if (task.status === 'done' || task.status === 'review') {
+        return new Response(JSON.stringify({ error: 'Cette tâche est déjà marquée comme terminée ou en review' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
